@@ -8,6 +8,7 @@ the presentation
 import json
 import os
 import re
+import glob
 
 from geventwebsocket import WebSocketApplication
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -78,8 +79,17 @@ class Revelation(object):
 
         :return: a list of strings with the slides content
         """
-        with open(path, "rb") as presentation:
-            slides = normalize_newlines(presentation.read().decode("utf-8"))
+
+        if os.path.isfile(path):
+            lst_path = [path]
+        else:
+            lst_path = glob.glob(os.path.join(path, "*.md"))
+
+        slides = ""
+        for path in lst_path:
+            with open(path, "rb") as presentation:
+                slides += normalize_newlines(
+                            presentation.read().decode("utf-8"))
 
         return [
             re.split(

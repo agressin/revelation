@@ -50,7 +50,7 @@ def installreveal(url):
 
     download = download_reveal(url)
 
-    click.echo("Installing reveal.js...")
+    click.echo("Installing reveal.js to "+REVEALJS_FOLDER)
 
     move_and_replace(extract_file(download[0]), REVEALJS_FOLDER)
 
@@ -62,6 +62,7 @@ def installreveal(url):
 @click.pass_context
 def mkpresentation(ctx, presentation):
     """Make presentation project boilerplate"""
+
     if os.path.exists(presentation):
         error_echo("Error: '{}' already exists.".format(presentation))
         ctx.exit(1)
@@ -129,8 +130,10 @@ def mkstatic(
     # Check for presentation file
     if os.path.isfile(presentation):
         path = os.path.dirname(presentation)
+    elif os.path.isdir(presentation):
+        path = presentation
     else:
-        error_echo("Error: Presentation file not found.")
+        error_echo("Error: Presentation file / dir not found.")
         ctx.exit(1)
 
     if style and (not os.path.isfile(style) or not style.endswith(".css")):
@@ -248,8 +251,10 @@ def start(ctx, presentation, port, config, media, theme, style, debug):
     # Check for presentation file
     if os.path.isfile(presentation):
         path = os.path.dirname(presentation)
+    elif os.path.isdir(presentation):
+        path = presentation
     else:
-        click.echo("Error: Presentation file not found.")
+        click.echo("Error: Presentation file / dir not found.")
         ctx.exit(1)
 
     # Check for style override file
