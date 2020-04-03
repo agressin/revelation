@@ -15,7 +15,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
 
     <!-- Presentation Styles -->
-    <link rel="stylesheet" href="static/revealjs/css/reveal.css">
+    <link rel="stylesheet" href="{{ static_revealjs }}/css/reveal.css">
 
     {% if theme %}
       <link rel="stylesheet" href="{{ theme }}" id="theme">
@@ -26,19 +26,19 @@
     {% endif %}
 
     <!-- For syntax highlighting -->
-    <link rel="stylesheet" href="static/revealjs/lib/css/zenburn.css">
+    <link rel="stylesheet" href="{{ static_revealjs }}/lib/css/zenburn.css">
 
     <!-- Printing and PDF exports -->
     <script>
       var link = document.createElement( 'link' );
       link.rel = 'stylesheet';
       link.type = 'text/css';
-      link.href = window.location.search.match( /print-pdf/gi ) ? "static/revealjs/css/print/pdf.css" : "static/revealjs/css/print/paper.css";
+      link.href = window.location.search.match( /print-pdf/gi ) ? "{{ static_revealjs }}/css/print/pdf.css" : "{{ static_revealjs }}/css/print/paper.css";
       document.getElementsByTagName( 'head' )[0].appendChild( link );
     </script>
 
     <!--[if lt IE 9]>
-    <script src="static/revealjs/lib/js/html5shiv.js"></script>
+    <script src="{{ static_revealjs }}/lib/js/html5shiv.js"></script>
     <![endif]-->
   </head>
 
@@ -89,8 +89,8 @@
     </div>
 
     <!-- Scripts loaded after the content -->
-    <script src="static/revealjs/lib/js/head.min.js"></script>
-    <script src="static/revealjs/js/reveal.js"></script>
+    <script src="{{ static_revealjs }}/lib/js/head.min.js"></script>
+    <script src="{{ static_revealjs }}/js/reveal.js"></script>
 
     <script>
       // Full list of configuration options available here:
@@ -99,23 +99,23 @@
         // Optional libraries used to extend on reveal.js
         dependencies: [
           // Cross-browser shim that fully implements classList - https://github.com/eligrey/classList.js/
-          { src: 'static/revealjs/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: '{{ static_revealjs }}/lib/js/classList.js', condition: function() { return !document.body.classList; } },
 
           // Interpret Markdown in <section> elements
-          { src: 'static/revealjs/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-          { src: 'static/revealjs/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: '{{ static_revealjs }}/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: '{{ static_revealjs }}/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
 
           // Syntax highlight for <code> elements
-          { src: 'static/revealjs/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: '{{ static_revealjs }}/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
 
           // Zoom in and out with Alt+click
-          { src: 'static/revealjs/plugin/zoom-js/zoom.js', async: true },
+          { src: '{{ static_revealjs }}/plugin/zoom-js/zoom.js', async: true },
 
           // Speaker notes
-          { src: 'static/revealjs/plugin/notes/notes.js', async: true },
+          { src: '{{ static_revealjs }}/plugin/notes/notes.js', async: true },
 
           // MathJax
-          { src: 'static/revealjs/plugin/math/math.js', async: true }
+          { src: '{{ static_revealjs }}/plugin/math/math.js', async: true }
         ]
       });
 

@@ -126,6 +126,7 @@ class Revelation(object):
             "theme": self.get_theme(self.config.get("REVEAL_THEME")),
             "style": self.style,
             "reloader": self.reloader,
+            "static_revealjs": "static/revealjs",
         }
 
         template = env.get_template("presentation.html")
