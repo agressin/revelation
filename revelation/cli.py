@@ -39,16 +39,21 @@ def cli(ctx, version):
 
 
 @cli.command("installreveal", help="Install or upgrade reveal.js dependency")
-@click.option("--url", "-u", help="Reveal.js download url")
-def installreveal(url):
+@click.option(
+    "--url",
+    "-u",
+    help="Reveal.js download url (link to zip or tar.gz)"
+)
+@click.option("--version", "-v", help="Reveal.js version (default is master)")
+def installreveal(url, version):
     """Reveal.js installation command
 
     Receives the download url to install from a specific version or
-    downloads the latest version if noting is passed
+    downloads master version if noting is passed
     """
     click.echo("Downloading reveal.js...")
 
-    download = download_reveal(url)
+    download = download_reveal(url, version)
 
     click.echo("Installing reveal.js to "+REVEALJS_FOLDER)
 
@@ -58,7 +63,11 @@ def installreveal(url):
 
 
 @cli.command("installrevealplugin", help="Install or upgrade reveal.js plugin")
-@click.option("--url", "-u", help="Reveal.js plugin download url")
+@click.option(
+    "--url",
+    "-u",
+    help="Reveal.js plugin download url (link to zip or tar.gz)"
+)
 def installrevealplugin(url):
     """Reveal.js plugin installation command
 
