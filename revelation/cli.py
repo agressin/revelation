@@ -57,6 +57,26 @@ def installreveal(url):
     click.echo("Installation completed!")
 
 
+@cli.command("installrevealplugin", help="Install or upgrade reveal.js plugin")
+@click.option("--url", "-u", help="Reveal.js plugin download url")
+def installrevealplugin(url):
+    """Reveal.js plugin installation command
+
+    Receives the download url to install from a specific version or
+    downloads the latest version if noting is passed
+    """
+    click.echo("Downloading reveal.js plugin...")
+
+    download = download_reveal(url, is_plugins=True)
+
+    install_dir = os.path.join(REVEALJS_FOLDER, "plugin")
+    click.echo("Installing reveal.js plugin to " + install_dir)
+
+    move_and_replace(extract_file(download[0]), install_dir)
+
+    click.echo("Installation completed!")
+
+
 @cli.command("mkpresentation", help="Create a new revelation presentation")
 @click.argument("presentation")
 @click.pass_context

@@ -9,6 +9,7 @@ from urllib.request import urlretrieve
 from . import default_config
 
 REVEAL_URL = "https://github.com/hakimel/reveal.js/archive/3.8.0.tar.gz"
+PLUGINS_URL = "https://github.com/rajgoel/reveal.js-plugins/archive/master.zip"
 
 
 def make_presentation(presentation_path):
@@ -34,12 +35,15 @@ def make_presentation(presentation_path):
         )
 
 
-def download_reveal(url=None):
+def download_reveal(url=None, is_plugins=False):
     """
     Download reveal.js installation files
     """
     if not url:
-        url = REVEAL_URL
+        if is_plugins:
+            url = PLUGINS_URL
+        else:
+            url = REVEAL_URL
 
     try:
         return urlretrieve(url)
