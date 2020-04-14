@@ -128,8 +128,10 @@ class Revelation(object):
             "reloader": self.reloader,
             "static_revealjs": "static/revealjs",
         }
-
-        template = env.get_template("presentation.html")
+        template_file = self.config.get("REVEAL_TEMPLATE")
+        if template_file is None:
+            template_file = "presentation.html"
+        template = env.get_template(template_file)
 
         return Response(
             template.render(**context), headers={"content-type": "text/html"}

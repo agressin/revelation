@@ -50,7 +50,7 @@ setup(
     url="https://github.com/humrochagf/revelation",
     license="MIT",
     packages=find_packages(),
-    package_data={PACKAGE: ["templates/presentation.html"]},
+    package_data={PACKAGE: ["templates/*.html"]},
     zip_safe=False,
     install_requires=REQUIREMENTS,
     entry_points=dict(console_scripts=["revelation=revelation.cli:cli"]),

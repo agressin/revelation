@@ -16,12 +16,14 @@ REVEAL_META = {
 
 # Reveal markdown slide separator
 REVEAL_SLIDE_SEPARATOR = "---"
-REVEAL_VERTICAL_SLIDE_SEPARATOR = "---~"
+REVEAL_VERTICAL_SLIDE_SEPARATOR = "--"
 
 # Themes
 # beige, black, blood, league, moon, night, serif, simple, sky,
 # solarized, white
-REVEAL_THEME = "black"
+REVEAL_THEME = "heig_ec+g"
+
+REVEAL_TEMPLATE = "myPresentation.html"
 
 REVEAL_CONFIG = {
     # Display controls in the bottom right corner
@@ -29,7 +31,7 @@ REVEAL_CONFIG = {
     # Display a presentation progress bar
     "progress": True,
     # Display the page number of the current slide
-    "slideNumber": False,
+    "slideNumber": "c/t",
     # Push each slide change to the browser history
     "history": True,
     # Enable keyboard shortcuts for navigation
@@ -68,7 +70,7 @@ REVEAL_CONFIG = {
     "previewLinks": False,
     # Transition style
     # default/cube/page/concave/zoom/linear/fade/none
-    "transition": "default",
+    "transition": "none",
     # Transition speed
     "transitionSpeed": "default",  # default/fast/slow
     # Transition style for full page slide backgrounds
