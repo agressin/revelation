@@ -9,7 +9,13 @@ from urllib.request import urlretrieve
 from . import default_config
 
 REVEAL_URL = "https://github.com/hakimel/reveal.js/archive/{version}.tar.gz"
-PLUGINS_URL = "https://github.com/rajgoel/reveal.js-plugins/archive/master.zip"
+PLUGINS_URL = {
+    "default": "https://github.com/rajgoel/reveal.js-plugins",
+    "menu": "https://github.com/denehyg/reveal.js-menu",
+    "math-katex": "https://github.com/j13z/reveal.js-math-katex-plugin",
+    "title-footer": "https://github.com/e-gor/Reveal.js-Title-Footer",
+    "toc-progress": "https://github.com/e-gor/Reveal.js-TOC-Progress"
+}
 
 
 def make_presentation(presentation_path):
@@ -35,13 +41,13 @@ def make_presentation(presentation_path):
         )
 
 
-def download_reveal(url=None, version="master", is_plugins=False):
+def download_reveal(url=None, version="master", plugin=None):
     """
     Download reveal.js installation files
     """
     if not url:
-        if is_plugins:
-            url = PLUGINS_URL
+        if plugin is not None:
+            url = PLUGINS_URL[plugin]+"/archive/master.zip"
         else:
             url = REVEAL_URL.format(version=version)
 
@@ -109,3 +115,18 @@ def extract_file(compressed_file, path="."):
 def normalize_newlines(text):
     """Normalize text to follow Unix newline pattern"""
     return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def install_reveal_plugin(url, plugin, revealjs_folder):
+    """Install reveal plugin"""
+    download = download_reveal(url, plugin=plugin)
+
+    extracted_file = extract_file(download[0])
+
+    if os.path.isdir(os.path.join(extracted_file, "plugin")):
+        install_dir = revealjs_folder
+    else:
+        install_dir = os.path.join(revealjs_folder, "plugin")
+    print("Installing reveal.js plugin to " + install_dir)
+
+    move_and_replace(extracted_file, install_dir)

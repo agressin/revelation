@@ -15,6 +15,8 @@ from revelation.utils import (
     extract_file,
     make_presentation,
     move_and_replace,
+    install_reveal_plugin,
+    PLUGINS_URL
 )
 
 REVEALJS_FOLDER = os.path.join(
@@ -64,24 +66,31 @@ def installreveal(url, version):
 
 @cli.command("installrevealplugin", help="Install or upgrade reveal.js plugin")
 @click.option(
+    "--plugin",
+    "-p",
+    help="Choose plugin ("+", ".join(PLUGINS_URL)+")"
+    + " or all to install all available plugins"
+)
+@click.option(
     "--url",
     "-u",
     help="Reveal.js plugin download url (link to zip or tar.gz)"
 )
-def installrevealplugin(url):
+def installrevealplugin(url, plugin):
     """Reveal.js plugin installation command
 
     Receives the download url to install from a specific version or
     downloads the latest version if noting is passed
     """
-    click.echo("Downloading reveal.js plugin...")
 
-    download = download_reveal(url, is_plugins=True)
-
-    install_dir = os.path.join(REVEALJS_FOLDER, "plugin")
-    click.echo("Installing reveal.js plugin to " + install_dir)
-
-    move_and_replace(extract_file(download[0]), install_dir)
+    if plugin == "all":
+        click.echo("Downloading ALL reveal.js plugin...")
+        for plugin in PLUGINS_URL:
+            click.echo(plugin)
+            install_reveal_plugin(url, plugin, REVEALJS_FOLDER)
+    else:
+        click.echo("Downloading reveal.js plugin...")
+        install_reveal_plugin(url, plugin, REVEALJS_FOLDER)
 
     click.echo("Installation completed!")
 
