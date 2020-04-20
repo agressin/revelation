@@ -92,7 +92,6 @@
     </div>
 
     <!-- Scripts loaded after the content -->
-    <script src="{{ static_revealjs }}/lib/js/head.min.js"></script>
     <script src="{{ static_revealjs }}/js/reveal.js"></script>
 
     <script>
@@ -118,9 +117,9 @@
           { src: '{{ static_revealjs }}/plugin/notes/notes.js', async: true },
 
           // MathJax
-          //{ src: '{{ static_revealjs }}/plugin/math/math.js', async: true },
+          { src: '{{ static_revealjs }}/plugin/math/math.js', async: true },
 
-          { src: '{{ static_revealjs }}/plugin/math-katex/math-katex.js', async: true },
+          //{ src: '{{ static_revealjs }}/plugin/math-katex/math-katex.js', async: true },
 
 					{ src: '{{ static_revealjs }}/plugin/menu/menu.js', async: true, condition: function() { return !!document.body.classList; } },
 
@@ -131,28 +130,32 @@
           { src: '{{ static_revealjs }}/plugin/chalkboard/chalkboard.js'},
         ],
         // plugin settings
-  			math: {
-  		        // Uncomment to disable syntax error notifications
-  		        // notificationsEnabled: false   // default: true
-  		        katexScript:     'https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js',
-  		        katexStylesheet: 'https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css'
-  		    },
-  		    // plugin menu, cf. https://github.com/denehyg/reveal.js-menu#configuration
-  		    menu: {
-  		        side: 'left',
-  		        numbers: false,
-  		        titleSelector: 'h1, h2, h3, h4, h5, h6',
-  		        hideMissingTitles: false,
-  		        markers: false,
-  		        custom: false,
-  		        transitions: true,
-  		        openButton: true,
-  		        openSlideNumber: true,
-  		        keyboard: true,
-  						custom: [
-  							{ title: 'Tools', icon: '<i class="fa fa-external-link-alt"></i>', src: '../../tools.html' }
-  						]
-  		    },
+        //math
+        math: {
+  					// mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js',
+  					config: 'TeX-AMS-MML_SVG',//'TeX-AMS_HTML-full',
+  				},
+        //math-katex
+  			//math: {
+  		  //      katexScript:     'https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js',
+  		  //      katexStylesheet: 'https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css'
+  		  //  },
+		    // plugin menu, cf. https://github.com/denehyg/reveal.js-menu#configuration
+		    menu: {
+		        side: 'left',
+		        numbers: false,
+		        titleSelector: 'h1, h2, h3, h4, h5, h6',
+		        hideMissingTitles: false,
+		        markers: false,
+		        custom: false,
+		        transitions: true,
+		        openButton: true,
+		        openSlideNumber: true,
+		        keyboard: true,
+						custom: [
+							{ title: 'Tools', icon: '<i class="fa fa-external-link-alt"></i>', src: '../../tools.html' }
+						]
+		    },
   			chalkboard: {
   				//src: "${dataDir}chalkboard.json",
   				toggleChalkboardButton: false,
