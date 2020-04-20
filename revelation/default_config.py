@@ -35,7 +35,7 @@ REVEAL_CONFIG = {
     # Push each slide change to the browser history
     "history": True,
     # Enable keyboard shortcuts for navigation
-    "keyboard": True,
+    # "keyboard": True,
     # Enable the slide overview mode
     "overview": True,
     # Vertical centering of slides
@@ -75,7 +75,7 @@ REVEAL_CONFIG = {
     "transitionSpeed": "default",  # default/fast/slow
     # Transition style for full page slide backgrounds
     # default/none/slide/concave/convex/zoom
-    "backgroundTransition": "default",
+    "backgroundTransition": "none",
     # Number of slides away from the current that are visible
     "viewDistance": 3,
     # Parallax background image
