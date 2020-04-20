@@ -84,6 +84,7 @@ class Revelation(object):
             lst_path = [path]
         else:
             lst_path = glob.glob(os.path.join(path, "*.md"))
+            lst_path.sort()
 
         slides = ""
         for path in lst_path:
