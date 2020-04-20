@@ -2,6 +2,7 @@
 
 import os
 import shutil
+import webbrowser
 from functools import partial
 
 import click
@@ -339,6 +340,8 @@ def start(ctx, presentation, port, config, media, theme, style, debug):
     PresentationReloader.tracking_path = os.path.abspath(path)
 
     click.echo("Running at http://localhost:{}".format(port))
+
+    webbrowser.open("http://localhost:{}".format(port), new=2)
 
     WebSocketServer(
         ("localhost", port),
