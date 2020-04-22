@@ -128,6 +128,7 @@ class Revelation(object):
             "style": self.style,
             "reloader": self.reloader,
             "static_revealjs": "static/revealjs",
+            "logo": self.config.get("REVEAL_THEME_LOGO")
         }
         template_file = self.config.get("REVEAL_TEMPLATE")
         if template_file is None:

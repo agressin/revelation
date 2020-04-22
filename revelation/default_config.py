@@ -23,6 +23,12 @@ REVEAL_VERTICAL_SLIDE_SEPARATOR = "--"
 # solarized, white
 REVEAL_THEME = "heig_ec+g"
 
+# Logos
+# ggt, master
+REVEAL_THEME_LOGO = "master"
+
+# Templates
+# presentation.html, myPresentation.html
 REVEAL_TEMPLATE = "myPresentation.html"
 
 REVEAL_CONFIG = {

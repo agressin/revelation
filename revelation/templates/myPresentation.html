@@ -63,7 +63,7 @@
     <!-- Presentation body -->
     <div class="reveal">
       <img class="logo" src="{{ static_revealjs }}/images/logo-heig-vd.svg" alt="">
-			<img class="logo-ggt" src="{{ static_revealjs }}/images/GGT.png" alt="GGT">
+			<img class="logo-{{ logo }}" src="{{ static_revealjs }}/images/logo-{{ logo }}.png" alt="{{ logo }}">
       <!-- Any section element inside of this container is displayed as a slide -->
       <div class="slides">
         {% for section in slides %}
@@ -98,6 +98,8 @@
       // Full list of configuration options available here:
       // https://github.com/hakimel/reveal.js#configuration
       Reveal.initialize({
+        width: 1280,
+        height: 720,
         // Optional libraries used to extend on reveal.js
         dependencies: [
           // Cross-browser shim that fully implements classList - https://github.com/eligrey/classList.js/
