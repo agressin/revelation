@@ -279,8 +279,9 @@ def mkstatic(
     default=False,
     help="Run the revelation server on debug mode",
 )
+@click.option("--hostname", "-h", default="localhost", help="Presentation server hostname")
 @click.pass_context
-def start(ctx, presentation, port, config, media, theme, style, debug):
+def start(ctx, presentation, port, config, media, theme, style, debug, hostname):
     """Start revelation presentation command"""
     # Check if reveal.js is installed
     if not os.path.exists(REVEALJS_FOLDER):
@@ -339,12 +340,12 @@ def start(ctx, presentation, port, config, media, theme, style, debug):
 
     PresentationReloader.tracking_path = os.path.abspath(path)
 
-    click.echo("Running at http://localhost:{}".format(port))
+    click.echo("Running at http://{}:{}".format(hostname,port))
 
-    webbrowser.open("http://localhost:{}".format(port), new=2)
+    webbrowser.open("http://{}:{}".format(hostname,port), new=2)
 
     WebSocketServer(
-        ("localhost", port),
+        (hostname, port),
         Resource(
             [
                 ("^/reloader.*", PresentationReloader),

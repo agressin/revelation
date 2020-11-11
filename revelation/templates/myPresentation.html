@@ -98,8 +98,6 @@
       // Full list of configuration options available here:
       // https://github.com/hakimel/reveal.js#configuration
       Reveal.initialize({
-        width: 1280,
-        height: 720,
         // Optional libraries used to extend on reveal.js
         dependencies: [
           // Cross-browser shim that fully implements classList - https://github.com/eligrey/classList.js/
@@ -155,7 +153,7 @@
 		        openSlideNumber: true,
 		        keyboard: true,
 						custom: [
-							{ title: 'Tools', icon: '<i class="fa fa-external-link-alt"></i>', src: '../../tools.html' }
+							{ title: 'Tools', icon: '<i class="fa fa-external-link-alt"></i>', src: '{{ static_revealjs }}/tools.html' }
 						]
 		    },
   			chalkboard: {
