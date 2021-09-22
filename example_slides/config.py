@@ -1,35 +1,58 @@
-# -*- coding: utf-8 -*-
-"""Example settings file"""
+"""
+Revelation presentation settings
+
+This is an automatic generated template for revelation presentations
+with the default options.
+"""
 
 REVEAL_META = {
     # Title of the slide
-    "title": "revelation",
+    "title": "Intro unité",
     # Author in the metadata of the slide
-    "author": "Humberto Rocha",
+    "author": "Adrien Gressinr",
     # Description in the metadata of the slide
-    "description": "A revelation example presentation",
+    "description": "Imaphoto - introduction de l'unité",
 }
 
 # Reveal markdown slide separator
 REVEAL_SLIDE_SEPARATOR = "---"
-REVEAL_VERTICAL_SLIDE_SEPARATOR = "---~"
+REVEAL_VERTICAL_SLIDE_SEPARATOR = "--"
 
 # Themes
 # beige, black, blood, league, moon, night, serif, simple, sky,
 # solarized, white
-REVEAL_THEME = "sky"
+REVEAL_THEME = "heig_ec+g"
+
+# Logos
+# ggt, master
+REVEAL_THEME_LOGO = "ggt"
+
+# Licence CC
+# cf https://creativecommons.org/choose/
+# nd : no derivative work
+# sa : share alike
+# nc : non commercial
+# by, by-nd, by-sa, by-nc, by-nc-nd, by-nc-sa
+REVEAL_LICENCE="by-sa"
+
+
+# Templates
+# presentation.html, myPresentation.html
+REVEAL_TEMPLATE = "myPresentation.html"
 
 REVEAL_CONFIG = {
+    "width": 2056,
+    "height": 1440,
     # Display controls in the bottom right corner
-    "controls": False,
+    "controls": True,
     # Display a presentation progress bar
     "progress": True,
     # Display the page number of the current slide
-    "slideNumber": True,
+    "slideNumber": "c/t",
     # Push each slide change to the browser history
     "history": True,
     # Enable keyboard shortcuts for navigation
-    "keyboard": True,
+    # "keyboard": True,
     # Enable the slide overview mode
     "overview": True,
     # Vertical centering of slides
@@ -64,12 +87,12 @@ REVEAL_CONFIG = {
     "previewLinks": False,
     # Transition style
     # default/cube/page/concave/zoom/linear/fade/none
-    "transition": "default",
+    "transition": "none",
     # Transition speed
     "transitionSpeed": "default",  # default/fast/slow
     # Transition style for full page slide backgrounds
     # default/none/slide/concave/convex/zoom
-    "backgroundTransition": "convex",
+    "backgroundTransition": "none",
     # Number of slides away from the current that are visible
     "viewDistance": 3,
     # Parallax background image

@@ -15,7 +15,8 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 from werkzeug.wrappers import Request, Response
-from werkzeug.wsgi import SharedDataMiddleware
+# from werkzeug.wsgi import SharedDataMiddleware
+from werkzeug.middleware.shared_data import SharedDataMiddleware
 
 from .config import Config
 from .utils import normalize_newlines
@@ -102,7 +103,7 @@ class Revelation(object):
         ]
 
     def get_theme(self, theme):
-        reveal_theme = "static/revealjs/css/theme/{}.css".format(theme)
+        reveal_theme = "static/revealjs/theme/{}.css".format(theme)
         fullpath_theme = os.path.join(os.path.dirname(__file__), reveal_theme)
 
         if os.path.isfile(fullpath_theme):
@@ -128,7 +129,8 @@ class Revelation(object):
             "style": self.style,
             "reloader": self.reloader,
             "static_revealjs": "static/revealjs",
-            "logo": self.config.get("REVEAL_THEME_LOGO")
+            "logo": self.config.get("REVEAL_THEME_LOGO"),
+            "licence": self.config.get("REVEAL_LICENCE"),
         }
         template_file = self.config.get("REVEAL_TEMPLATE")
         if template_file is None:
