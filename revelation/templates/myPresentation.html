@@ -12,7 +12,7 @@
     <!-- Presentation Styles -->
     <link rel="stylesheet" href="{{ static_revealjs }}/reset.css">
     <link rel="stylesheet" href="{{ static_revealjs }}/reveal.css">
-    
+
 
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/title-footer/title-footer.css">
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/toc-progress/toc-progress.css">
@@ -21,9 +21,9 @@
     {% if theme %}
 
       <link rel="stylesheet" href="{{ theme }}" id="theme"> <!-- {{ static_revealjs }}/theme/{{ theme }}.css -->
-    
+
     {% else %}
-    
+
      <link rel="stylesheet" href="{{ static_revealjs }}/theme/white.css" id="theme">
 
     {% endif %}
@@ -43,7 +43,7 @@
     <!-- Presentation body -->
     <div class="reveal">
       <img class="logo" src="{{ static_revealjs }}/images/logo-heig-vd.svg" alt="">
-	  <img class="logo-{{ logo }}" src="{{ static_revealjs }}/images/logo-{{ logo }}.png" alt="{{ logo }}">
+	  <img class="logo-right" src="{{ static_revealjs }}/images/logo-{{ logo }}.png" alt="{{ logo }}">
       <!-- Any section element inside of this container is displayed as a slide -->
       <div class="slides">
         {% for section in slides %}
@@ -71,7 +71,7 @@
 
     </div>
 
-<a rel="license" href="http://creativecommons.org/licenses/{{ licence }}/4.0/"><img alt="Creative Commons License" style="border-width:0;position:absolute;bottom:5px;right:150px;" src="https://i.creativecommons.org/l/{{ licence }}/4.0/88x31.png" /></a>
+<a rel="license" href="http://creativecommons.org/licenses/{{ licence }}/4.0/"><img alt="Creative Commons License" style="border-width:0;position:absolute;bottom:5px;right:150px;position:fixed;" src="https://i.creativecommons.org/l/{{ licence }}/4.0/88x31.png" /></a>
 
     <!-- Scripts loaded after the content -->
     <script  src="{{ static_revealjs }}/reveal.js"></script>
@@ -82,7 +82,7 @@
     <script src="{{ static_revealjs }}/plugin/math/math.js"></script>
 
     <script>
-    
+
 	Reveal.initialize({
 		controls: true,
 		progress: true,
@@ -91,15 +91,15 @@
         dependencies: [
 			{ src: '{{ static_revealjs }}/plugin/menu/menu.js', async: true, condition: function() { return !!document.body.classList; } },
 			{ src: '{{ static_revealjs }}/plugin/title-footer/title-footer.js', async: true, callback: function() { title_footer.initialize(); } },
-			{ src: '{{ static_revealjs }}/plugin/toc-progress/toc-progress.js', async: true, callback: function() { toc_progress.initialize(); toc_progress.create(); } },
+		/*	{ src: '{{ static_revealjs }}/plugin/toc-progress/toc-progress.js', async: true, callback: function() { toc_progress.initialize(); toc_progress.create(); } }, */
         ],
 		plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealMath ]
 	});
 
-      
+
       Reveal.configure({{ config|tojson }});
-      
-      
+
+
     </script>
   </body>
 </html>
