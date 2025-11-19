@@ -51,7 +51,8 @@ class Revelation(object):
             reloader: Enable live reload functionality
         """
         self.config = Config(config)
-        self.presentation = self._validate_path(presentation, "presentation")
+        # Presentation can be either a file or directory
+        self.presentation = self._validate_path(presentation, "presentation", must_exist=True, is_file=None)
         self.reloader = reloader
 
         shared_data = {
@@ -124,17 +125,17 @@ class Revelation(object):
             )
             return None
 
-        # Check if it's a file/directory as expected
-        if must_exist:
+        # Check if it's a file/directory as expected (only for specific types)
+        if must_exist and is_file is not None:
             if is_file and not path_obj.is_file():
                 warnings.warn(
                     f"{path_type.capitalize()} path is not a file: {path}",
                     UserWarning
                 )
                 return None
-            elif not is_file and not path_obj.is_dir():
+            elif not is_file and not path_obj.is_dir() and not path_obj.is_file():
                 warnings.warn(
-                    f"{path_type.capitalize()} path is not a directory: {path}",
+                    f"{path_type.capitalize()} path does not exist or is not accessible: {path}",
                     UserWarning
                 )
                 return None
