@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+  <head>
+    <!-- Metadata about the presentation -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>{{ meta.title }}</title>
+
+    <meta name="description" content="{{ meta.description }}">
+    <meta name="author" content="{{ meta.author }}">
+
+    <!-- Presentation Styles -->
+    <link rel="stylesheet" href="{{ static_revealjs }}/reset.css">
+    <link rel="stylesheet" href="{{ static_revealjs }}/reveal.css">
+
+    <!--
+    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/title-footer/title-footer.css">
+    -->
+    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/toc-progress/toc-progress.css">
+
+    <!-- leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+    .leaflet-control  { display:none;}
+    </style>
+
+    {% if theme %}
+      <link rel="stylesheet" href="{{ theme }}" id="theme">
+    {% endif %}
+
+    {% if style %}
+      <link rel="stylesheet" href="{{ style }}" id="style">
+    {% endif %}
+
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/highlight/monokai.css" id="highlight-theme">
+
+  </head>
+
+  <body>
+    <!-- Presentation body -->
+    <div class="reveal">
+      <img class="logo" src="{{ static_revealjs }}/images/logo-heig-vd.svg" alt="">
+	  <img class="logo-right" src="{{ static_revealjs }}/images/logo-{{ logo }}.png" alt="{{ logo }}">
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+        {% for section in slides %}
+          {% if section|length > 1 %}
+            <section>
+              {% for slide in section %}
+                <section data-markdown>
+                  <textarea data-template>
+                    {{ slide|safe }}
+                  </textarea>
+                </section>
+              {% endfor %}
+            </section>
+          {% else %}
+            {% for slide in section %}
+              <section data-markdown>
+                <textarea data-template>
+                  {{ slide|safe }}
+                </textarea>
+              </section>
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+      </div>
+
+    </div>
+    {% if licence %}
+      <a rel="license" href="http://creativecommons.org/licenses/{{ licence }}/4.0/">
+          <img alt="Creative Commons License" style="border-width:0;position:absolute;bottom:5px;right:150px;" src="https://i.creativecommons.org/l/{{ licence }}/4.0/88x31.png" />
+      </a>
+    {% endif %}
+
+
+    <!-- Reveal.js script -->
+    <script src="{{ static_revealjs }}/reveal.js"></script>
+
+    <!-- Reveal.js plugins -->
+    <script src="{{ static_revealjs }}/plugin/markdown/markdown.js"></script>
+    <script src="{{ static_revealjs }}/plugin/highlight/highlight.js"></script>
+    <script src="{{ static_revealjs }}/plugin/notes/notes.js"></script>
+    <script src="{{ static_revealjs }}/plugin/math/math.js"></script>
+    <!--
+    <script src="{{ static_revealjs }}/plugin/search/search.js"></script>
+    <script src="{{ static_revealjs }}/plugin/zoom/zoom.js"></script>
+    <script src="{{ static_revealjs }}/plugin/menu/menu.js"></script>
+    <script src="{{ static_revealjs }}/plugin/chalkboard/plugin.js"></script>
+    <script src="{{ static_revealjs }}/plugin/customcontrols/plugin.js"></script>
+    -->
+    <!-- leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+
+      Reveal.initialize({
+
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealMath,
+        ],
+		dependencies:
+		[ //{ src: '{{ static_revealjs }}/plugin/title-footer/title-footer.js', async: true, callback: function() { title_footer.initialize(); } }
+		]
+      });
+
+      Reveal.configure({{ config|tojson }});
+
+      <!-- leaflet -->
+      var map_lausanne = null;
+      var map_fribourg = null;
+      var lyr_ortho2022 = L.tileLayer('https://rar-indg.heig-vd.ch/map/Fribourg/Ortho_Frib_2022_fme/{z}/{x}/{y}.png',
+                    {tms: 1, opacity: 1.0, attribution: "", minZoom: 13, maxZoom: 20});
+      var lyr_pred = null;
+
+      Reveal.on( 'slidechanged', event => {
+      // event.previousSlide, event.currentSlide, event.indexh, event.indexv
+        console.log("slidechanged", event );
+        //Map Lausanne slide 0/1 :
+        if ((event.indexh === 0) && (event.indexv === 1)){
+
+          if ( map_lausanne == null ){
+            map_lausanne = L.map('map_lausanne');
+            L.tileLayer.wms('http://wms.geo.admin.ch/?',
+                    { layers: 'ch.swisstopo.swissimage',
+                      format: 'image/jpeg', detectRetina: true,}).addTo(map_lausanne);
+            // .setOpacity(0.5)
+          }
+          map_lausanne.setView([46.82643, 8.29707], 8);
+          map_lausanne.flyTo([46.51626, 6.629139], 16, { animate: true, duration: 5 });
+        }
+        //Map Fribourg slide 2/1 :
+        if ((event.indexh === 2) && (event.indexv === 1)){
+
+          if ( map_fribourg == null ){
+            map_fribourg = L.map('map_fribourg');
+            lyr_ortho2022.addTo(map_fribourg);
+            var logo = L.control({position: 'bottomright'});
+            logo.onAdd = function(map_fribourg){
+                var div = L.DomUtil.create('div', 'legend');
+                div.innerHTML= "<img src='https://rar-indg.heig-vd.ch/map/legend_round.png' height='400px' />";
+                return div;
+            }
+            logo.addTo(map_fribourg);
+          }
+          map_fribourg.setView([46.80634, 7.1617], 15);
+        }
+
+      } );
+
+      Reveal.on( 'fragmentshown', event => {
+        console.log("fragmentshown", event.fragment );
+        //Map Fribourg slide 1/1 :
+        if (event.fragment.getAttribute("id") === "fr-1"){
+          if (map_fribourg !== null && lyr_pred == null) {
+            lyr_pred = L.tileLayer('https://rar-indg.heig-vd.ch/map/Fribourg/ortho_fribourg_10cm_geo_all_slide50_color/{z}/{x}/{y}.png',
+              {tms: 1, opacity: 0.5, attribution: "", minZoom: 13, maxZoom: 20});
+            lyr_pred.setOpacity(0.5).addTo(map_fribourg);
+            map_fribourg.flyTo([46.79723, 7.15346], 18, {animate: true, duration: 5});
+          }
+
+        }
+        if (event.fragment.getAttribute("id")=== "fr-2"){
+          map_fribourg.flyTo([46.79925, 7.15171], 20, {animate: true, duration: 3});
+        }
+      } );
+
+
+
+    </script>
+
+
+  </body>
+</html>

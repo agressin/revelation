@@ -1,5 +1,6 @@
 """Cli tool to handle revelation commands"""
 
+import glob
 import os
 import shutil
 import webbrowser
@@ -19,6 +20,7 @@ from revelation.utils import (
     install_reveal_plugin,
     PLUGINS_URL
 )
+from revelation.convert_config import convert_config
 
 REVEALJS_FOLDER = os.path.join(
     os.path.join(os.path.dirname(revelation.__file__), "static"), "revealjs"
@@ -227,15 +229,20 @@ def mkstatic(
     else:
         shutil.copytree(theme, os.path.join(output_folder, "theme"))
 
-    # Check for configuration file
+    # Check for configuration file (prefer TOML over Python)
     if not config:
-        config = os.path.join(path, "config.py")
+        toml_config = os.path.join(path, "config.toml")
+        py_config = os.path.join(path, "config.py")
 
-    if not os.path.isfile(config):
-        # Running without configuration file
-        config = None
-
-        click.echo("Configuration file not detected, running with defaults.")
+        if os.path.isfile(toml_config):
+            config = toml_config
+        elif os.path.isfile(py_config):
+            config = py_config
+            click.echo("\n⚠️  Note: Using deprecated Python config. Consider converting to TOML.")
+            click.echo(f"   Run: revelation convertconfig {py_config}\n")
+        else:
+            config = None
+            click.echo("Configuration file not detected, running with defaults.")
 
     click.echo("Generating static presentation...")
 
@@ -257,6 +264,41 @@ def mkstatic(
             os.path.realpath(output_folder)
         )
     )
+
+
+@cli.command("convertconfig", help="Convert Python config to TOML format")
+@click.argument("python_config")
+@click.option(
+    "--output",
+    "-o",
+    default=None,
+    help="Output TOML file (default: same name with .toml extension)"
+)
+@click.option(
+    "--force",
+    "-f",
+    is_flag=True,
+    help="Overwrite output file if it exists"
+)
+@click.pass_context
+def convertconfig(ctx, python_config, output, force):
+    """Convert Python config file to secure TOML format"""
+    from pathlib import Path
+
+    python_file = Path(python_config)
+    output_file = Path(output) if output else None
+
+    if not python_file.exists():
+        error_echo(f"Error: Config file not found: {python_config}")
+        ctx.exit(1)
+
+    click.echo(f"Converting {python_config} to TOML format...")
+
+    if convert_config(python_file, output_file, force):
+        click.echo("Conversion completed successfully!")
+    else:
+        error_echo("Conversion failed. See error messages above.")
+        ctx.exit(1)
 
 
 @cli.command("start", help="Start the revelation server")
@@ -291,16 +333,35 @@ def start(ctx, presentation, port, config, media, theme, style, debug, hostname)
     # Check for presentation file
     if os.path.isfile(presentation):
         path = os.path.dirname(presentation)
+        if not presentation.endswith('.md'):
+            click.echo(f"\n⚠️  Warning: File '{presentation}' does not have .md extension.")
+            click.echo("   Revelation expects markdown files with .md extension.\n")
     elif os.path.isdir(presentation):
         path = presentation
+        # Check if directory contains any .md files
+        md_files = glob.glob(os.path.join(presentation, "*.md"))
+        if not md_files:
+            error_echo(f"\n✗ Error: No markdown files (.md) found in '{presentation}'")
+            click.echo("\nTo create a new presentation:")
+            click.echo(f"  $ revelation mkpresentation {os.path.basename(presentation)}\n")
+            ctx.exit(1)
     else:
-        click.echo("Error: Presentation file / dir not found.")
+        error_echo(f"\n✗ Error: Presentation not found: '{presentation}'")
+        click.echo("\nThe path must be either:")
+        click.echo("  • A markdown file (.md)")
+        click.echo("  • A directory containing .md files")
+        click.echo("\nTo create a new presentation:")
+        click.echo(f"  $ revelation mkpresentation my_presentation\n")
         ctx.exit(1)
 
     # Check for style override file
-    if style and (not os.path.isfile(style) or not style.endswith(".css")):
-        click.echo("Error: Style is not a css file or does not exists.")
-        ctx.exit(1)
+    if style:
+        if not os.path.isfile(style):
+            error_echo(f"\n✗ Error: Style file not found: '{style}'")
+            ctx.exit(1)
+        if not style.endswith(".css"):
+            error_echo(f"\n✗ Error: Style file must be a .css file, got: '{style}'")
+            ctx.exit(1)
 
     # Check for media root
     if not media:
@@ -320,36 +381,80 @@ def start(ctx, presentation, port, config, media, theme, style, debug, hostname)
         # Running without theme folder
         theme = None
 
-    # Check for configuration file
+    # Check for configuration file (prefer TOML over Python)
     if not config:
-        config = os.path.join(path, "config.py")
+        toml_config = os.path.join(path, "config.toml")
+        py_config = os.path.join(path, "config.py")
 
-    if not os.path.isfile(config):
-        # Running without configuration file
-        config = None
+        if os.path.isfile(toml_config):
+            config = toml_config
+        elif os.path.isfile(py_config):
+            config = py_config
+            # Suggest conversion from Python to TOML
+            click.echo("\n⚠️  WARNING: Python config files are deprecated!")
+            click.echo("   For security reasons, please convert to TOML format.")
+            click.echo(f"\n   Quick conversion:")
+            click.echo(f"   $ revelation convertconfig {py_config}\n")
 
-        click.echo("Configuration file not detected, running with defaults.")
+            if click.confirm("Would you like to convert now?", default=False):
+                from pathlib import Path
+                if convert_config(Path(py_config), Path(toml_config), force=False):
+                    click.echo(f"\n✓ Converted to {toml_config}")
+                    click.echo("  Using new TOML config...\n")
+                    config = toml_config
+                else:
+                    click.echo("\n✗ Conversion failed, using Python config")
+        else:
+            config = None
+            click.echo("Configuration file not detected, running with defaults.")
 
     click.echo("Starting revelation server...")
 
     # instantiating revelation app
-    app = Revelation(presentation, config, media, theme, style, True)
+    try:
+        app = Revelation(presentation, config, media, theme, style, True)
+    except Exception as e:
+        error_echo(f"\n✗ Error initializing presentation: {e}")
+        click.echo("\nPlease check:")
+        click.echo("  • Presentation files are valid markdown")
+        click.echo("  • Configuration file syntax is correct")
+        click.echo("  • All paths are accessible\n")
+        ctx.exit(1)
 
     if debug:
         app = DebuggedApplication(app)
 
     PresentationReloader.tracking_path = os.path.abspath(path)
 
-    click.echo("Running at http://{}:{}".format(hostname,port))
+    server_url = f"http://{hostname}:{port}"
+    click.echo(f"\n✓ Server starting at {server_url}")
+    click.echo(f"  Press Ctrl+C to stop\n")
 
-    webbrowser.open("http://{}:{}".format(hostname,port), new=2)
+    # Try to open browser, but don't fail if it doesn't work
+    try:
+        webbrowser.open(server_url, new=2)
+    except Exception as e:
+        click.echo(f"⚠️  Could not open browser automatically: {e}")
+        click.echo(f"   Please open {server_url} manually\n")
 
-    WebSocketServer(
-        (hostname, port),
-        Resource(
-            [
-                ("^/reloader.*", PresentationReloader),
-                ("^/.*", DebuggedApplication(app)),
-            ]
-        ),
-    ).serve_forever()
+    try:
+        WebSocketServer(
+            (hostname, port),
+            Resource(
+                [
+                    ("^/reloader.*", PresentationReloader),
+                    ("^/.*", DebuggedApplication(app)),
+                ]
+            ),
+        ).serve_forever()
+    except OSError as e:
+        if "Address already in use" in str(e):
+            error_echo(f"\n✗ Error: Port {port} is already in use")
+            click.echo(f"\nTry using a different port:")
+            click.echo(f"  $ revelation start {presentation} --port {port + 1}\n")
+        else:
+            error_echo(f"\n✗ Server error: {e}\n")
+        ctx.exit(1)
+    except KeyboardInterrupt:
+        click.echo("\n\n✓ Server stopped gracefully")
+        ctx.exit(0)

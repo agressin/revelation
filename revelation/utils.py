@@ -44,17 +44,35 @@ def make_presentation(presentation_path):
 def download_reveal(url=None, version="master", plugin=None):
     """
     Download reveal.js installation files
+
+    Args:
+        url: Direct URL to download from (optional)
+        version: Version of reveal.js to download (default: "master")
+        plugin: Plugin name to download (optional)
+
+    Returns:
+        tuple: (filename, headers) from urlretrieve
+
+    Raises:
+        ValueError: If plugin is invalid
+        URLError: If download fails
+        HTTPError: If HTTP request fails
     """
     if not url:
         if plugin is not None:
+            if plugin not in PLUGINS_URL:
+                raise ValueError(
+                    f"Unknown plugin '{plugin}'. "
+                    f"Available plugins: {', '.join(PLUGINS_URL.keys())}"
+                )
             url = PLUGINS_URL[plugin]+"/archive/master.zip"
         else:
             url = REVEAL_URL.format(version=version)
 
     try:
         return urlretrieve(url)
-    except Exception:
-        raise
+    except Exception as e:
+        raise RuntimeError(f"Failed to download from {url}: {e}") from e
 
 
 def move_and_replace(src, dst):

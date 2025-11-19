@@ -1,0 +1,456 @@
+<!doctype html>
+<html>
+  <head>
+    <!-- Metadata about the presentation -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>{{ meta.title }}</title>
+
+    <meta name="description" content="{{ meta.description }}">
+    <meta name="author" content="{{ meta.author }}">
+
+    <!-- Presentation Styles -->
+    <link rel="stylesheet" href="{{ static_revealjs }}/reset.css">
+    <link rel="stylesheet" href="{{ static_revealjs }}/reveal.css">
+    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/toc-progress/toc-progress.css">
+
+    <!-- leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+    .leaflet-control  { display:none;}
+    </style>
+
+    {% if theme %}
+      <link rel="stylesheet" href="{{ theme }}" id="theme">
+    {% endif %}
+
+    {% if style %}
+      <link rel="stylesheet" href="{{ style }}" id="style">
+    {% endif %}
+
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/highlight/monokai.css" id="highlight-theme">
+
+  </head>
+
+  <body>
+    <!-- Presentation body -->
+    <div class="reveal">
+      <img class="logo" src="{{ static_revealjs }}/images/logo-heig-vd.svg" alt="">
+	  <img class="logo-right" src="{{ static_revealjs }}/images/logo-{{ logo }}.png" alt="{{ logo }}">
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+        {% for section in slides %}
+          {% if section|length > 1 %}
+            <section>
+              {% for slide in section %}
+                <section data-markdown>
+                  <textarea data-template>
+                    {{ slide|safe }}
+                  </textarea>
+                </section>
+              {% endfor %}
+            </section>
+          {% else %}
+            {% for slide in section %}
+              <section data-markdown>
+                <textarea data-template>
+                  {{ slide|safe }}
+                </textarea>
+              </section>
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+      </div>
+
+    </div>
+    {% if licence %}
+      <a rel="license" href="http://creativecommons.org/licenses/{{ licence }}/4.0/">
+          <img alt="Creative Commons License" style="border-width:0;position:absolute;bottom:5px;right:150px;" src="https://i.creativecommons.org/l/{{ licence }}/4.0/88x31.png" />
+      </a>
+    {% endif %}
+
+
+    <!-- Reveal.js script -->
+    <script src="{{ static_revealjs }}/reveal.js"></script>
+
+    <!-- Reveal.js plugins -->
+    <script src="{{ static_revealjs }}/plugin/markdown/markdown.js"></script>
+    <script src="{{ static_revealjs }}/plugin/highlight/highlight.js"></script>
+    <script src="{{ static_revealjs }}/plugin/notes/notes.js"></script>
+    <script src="{{ static_revealjs }}/plugin/math/math.js"></script>
+
+    <!-- leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- chartjs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+
+      Reveal.initialize({
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealMath,
+        ],
+		dependencies:
+		[ ]
+      });
+
+      Reveal.configure({{ config|tojson }});
+
+      <!-- leaflet -->
+      let map_fribourg = null;
+      let lyr_ortho2022 = L.tileLayer('https://rar-indg.heig-vd.ch/map/Fribourg/Ortho_Frib_2022_fme/{z}/{x}/{y}.png',
+                    {tms: 1, opacity: 1.0, attribution: "", minZoom: 13, maxZoom: 20});
+      let lyr_pred = null;
+
+      Reveal.on( 'slidechanged', event => {
+      // event.previousSlide, event.currentSlide, event.indexh, event.indexv
+        console.log("slidechanged", event );
+        //Map Fribourg slide 0/1 :
+        if ((event.indexh === 0) && (event.indexv === 1)){
+          Reveal.navigateFragment(-1);
+          if ( map_fribourg == null ){
+            map_fribourg = L.map('map_fribourg');
+            lyr_ortho2022.addTo(map_fribourg);
+            let logo = L.control({position: 'bottomright'});
+            logo.onAdd = function(map_fribourg){
+                let div = L.DomUtil.create('div', 'legend');
+                div.innerHTML= "<img src='https://rar-indg.heig-vd.ch/map/legend_round.png' height='400px' />";
+                return div;
+            }
+            logo.addTo(map_fribourg);
+          }
+          map_fribourg.setView([46.80634, 7.1617], 15);
+        }
+        //jeu de données Flair slide 3/1 :
+        if ((event.indexh === 3) && (event.indexv === 1)){
+          doughnut.destroy()
+          doughnut = new Chart(ctx_doughnut, {
+            type: 'doughnut', //bar
+            data: data_doughnut,
+            options: options_doughnut
+          });
+        }
+        if ((event.indexh === 3) && (event.indexv === 2)){
+          Reveal.navigateFragment(-1);
+          if (scatter_chart.data.datasets.length >= 6) {
+            scatter_chart.data.datasets.splice(6, 6);
+          }
+          scatter_chart.destroy()
+          scatter_chart = new Chart(ctx_scatter, {
+              type: 'scatter',
+              data: {
+                datasets: datasetsCNN
+              },
+              options: options
+          });
+        }
+        if ((event.indexh === 3) && (event.indexv === 3)){
+          Reveal.navigateFragment(-1);
+          if (chart_bar.data.labels.length >= 12) {
+            chart_bar.data.labels.splice(12, 1);
+            chart_bar.data.datasets[0].data.splice(12, 1);
+            if (chart_bar.data.datasets.length >= 2) {
+              chart_bar.data.datasets[1].data.splice(12, 1);
+            }
+          }
+          if (chart_bar.data.datasets.length >= 2) {
+            chart_bar.data.datasets.splice(1, 1);
+          }
+          chart_bar.destroy()
+          chart_bar = new Chart(ctx_bar, {
+            type: 'bar',
+            data: data_bar_ign,
+            options: options_bar
+          });
+        }
+        if ((event.indexh === 3) && (event.indexv === 4)){
+         if (chart_bar_1.data.labels.length >= 7) {
+            chart_bar_1.data.labels.splice(7, 1);
+            chart_bar_1.data.datasets[0].data.splice(7, 1);
+            chart_bar_1.data.datasets[1].data.splice(7, 1);
+            chart_bar_1.data.datasets[2].data.splice(7, 1);
+          }
+          Reveal.navigateFragment(-1);
+          chart_bar_1.destroy()
+          chart_bar_1 = new Chart(ctx_bar_1, {
+            type: 'bar',
+            data: data_bar_stdl,
+            options: options_bar
+          });
+        }
+      } );
+
+      Reveal.on( 'fragmentshown', event => {
+        console.log("fragmentshown", event.fragment );
+        //Map Fribourg slide 1/1 :
+        if (event.fragment.getAttribute("id") === "fr-1"){
+          if (map_fribourg !== null && lyr_pred == null) {
+            lyr_pred = L.tileLayer('https://rar-indg.heig-vd.ch/map/Fribourg/ortho_fribourg_10cm_geo_all_slide50_color/{z}/{x}/{y}.png',
+              {tms: 1, opacity: 0.5, attribution: "", minZoom: 13, maxZoom: 20});
+            lyr_pred.setOpacity(0.5).addTo(map_fribourg);
+            map_fribourg.flyTo([46.79723, 7.15346], 18, {animate: true, duration: 5});
+          }
+
+        }
+        if (event.fragment.getAttribute("id")=== "fr-2"){
+          map_fribourg.flyTo([46.79925, 7.15171], 20, {animate: true, duration: 3});
+        }
+        if (event.fragment.getAttribute("id")=== "res-heig") {
+          // Add the new dataset to the existing chart
+          chart_bar.data.datasets.push(dataset_heig);
+          // Update the chart
+          chart_bar.update();
+        }
+        if (event.fragment.getAttribute("id")=== "res-heig-a") {
+          // Add the new dataset to the existing chart
+          if (chart_bar.data.labels.length <= 12) {
+            // Add the new dataset to the existing chart
+            chart_bar.data.labels.push('𝐦𝐞𝐚𝐧 𝐈𝐨𝐔');
+            chart_bar.data.datasets[0].data.push(ign_mean);
+            chart_bar.data.datasets[1].data.push(heig_mean);
+            // Update the chart
+            chart_bar.update();
+          }
+        }
+        if (event.fragment.getAttribute("id")=== "res-heig-1") {
+          // Add the new dataset to the existing chart
+
+          scatter_chart.data.datasets = scatter_chart.data.datasets.concat(datasetsVIT);
+          // Update the chart
+          scatter_chart.update();
+        }
+        if (event.fragment.getAttribute("id")=== "res-heig-2") {
+          if (chart_bar_1.data.labels.length <= 7) {
+            // Add the new dataset to the existing chart
+            chart_bar_1.data.labels.push('𝐦𝐞𝐚𝐧 𝐈𝐨𝐔');
+            chart_bar_1.data.datasets[0].data.push(heig_stdl_mean);
+            chart_bar_1.data.datasets[1].data.push(ofs_stdl_mean);
+            chart_bar_1.data.datasets[2].data.push(ign_stdl_mean);
+            // Update the chart
+            chart_bar_1.update();
+          }
+        }
+      } );
+    </script>
+
+  <script>
+<!-- charjs-->
+      const ctx_doughnut = document.getElementById('doughnut_chart');
+      const ctx_bar = document.getElementById('bar_chart');
+      const ctx_bar_1 = document.getElementById('bar_chart_1');
+      const ctx_scatter = document.getElementById('bar_scatter');
+
+      // Colors for each category
+      let colors = ['rgba(219, 14, 154, 1)', 'rgba(147, 142, 123, 1)', 'rgba(248, 12, 0, 1)', 'rgba(169, 113, 1, 1)', 'rgba(21, 83, 174, 1)', 'rgba(25, 74, 38, 1)', 'rgba(70, 228, 131, 1)', 'rgba(243, 166, 13, 1)', 'rgba(102, 0, 130, 1)', 'rgba(85, 255, 0, 1)', 'rgba(255, 243, 13, 1)', 'rgba(228, 223, 124, 1)', 'rgba(206, 162, 86, 1)'];
+      let labels = ['Bâtiment', 'Surface perméable', 'Surface imperméable', 'Sol nu', 'Eau', 'Conifère', 'Feuillus', 'Broussailles', 'Vignoble', 'Végétation herbacée', 'Terre agricole', 'Terre labourée', 'Autre'];
+      // Configuration options
+      let fontSize = 25;
+
+      let options_doughnut = {
+        responsive: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels : {font: { size: fontSize }},
+          },
+        }
+      }
+      let data_doughnut = {
+          labels: labels,
+          datasets: [{
+            label: 'Surface',
+            data: [8.23, 8.07, 13.98, 3.65, 5.1, 2.67, 15.08, 6.94, 3.28, 18.72, 10.16, 3.55, 0.58],
+            backgroundColor: colors,
+            hoverOffset: 4
+          }]
+        };
+      let doughnut = new Chart(ctx_doughnut, {
+            type: 'doughnut', //bar
+            data: data_doughnut,
+            options: options_doughnut
+          });
+
+      // Append '4d' to the colors (alpha channel), except for the hovered index
+      function handleHover(evt, item, legend) {
+        legend.chart.data.datasets[0].backgroundColor.forEach((color, index, colors) => {
+          colors[index] = index === item.index || color.length === 9 ? color : color + '4D';
+        });
+        legend.chart.update();
+      }
+      // Removes the alpha channel from background colors
+      function handleLeave(evt, item, legend) {
+        legend.chart.data.datasets[0].backgroundColor.forEach((color, index, colors) => {
+          colors[index] = color.length === 9 ? color.slice(0, -2) : color;
+        });
+        legend.chart.update();
+      }
+      let options_bar = {
+        responsive: false,
+        scales: {
+          x: {
+            ticks : {font: { size: fontSize }},
+          },
+          y: {
+            ticks : {font: { size: fontSize }},
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+            labels : {font: { size: fontSize }},
+            onHover: handleHover,
+            onLeave: handleLeave
+          },
+          title: {
+                display: true,
+                text: 'Comparaison des résultats (IoU par classe)',
+                font: { size: fontSize }
+            }
+        }
+      }
+      dataset_ign = {
+            label: 'IGN',
+            data: [0.8, 0.47, 0.71, 0.4, 0.78, 0.32, 0.65, 0.31, 0.80, 0.51, 0.45, 0.33],
+            //backgroundColor: colors,
+            hoverOffset: 4
+          }
+      dataset_best = {
+            label: 'Best',
+            data: [0.847, 0.6147, 0.7753, 0.7278, 0.9281, 0.4221, 0.6876, 0.3993, 0.8582, 0.592, 0.5751, 0.4814],
+            //backgroundColor: colors,
+            hoverOffset: 4
+          }
+      dataset_heig = {
+            label: 'HEIG',
+            data: [0.847, 0.577, 0.767, 0.671, 0.912, 0.397, 0.665, 0.369, 0.846, 0.572, 0.529, 0.499],
+            //backgroundColor: colors,
+            hoverOffset: 4
+          }
+      var heig_mean = 0.638;
+      var ign_mean = 0.547;
+
+      let data_bar_ign = {
+          labels: labels.slice(0, -1),
+          datasets: [dataset_ign] //dataset_best
+        };
+      let chart_bar = new Chart(ctx_bar, {
+            type: 'bar',
+            data: data_bar_ign,
+            options: options_bar
+          });
+    function getRandomColor() {
+      var r = Math.floor(Math.random() * 256);
+      var g = Math.floor(Math.random() * 256);
+      var b = Math.floor(Math.random() * 256);
+      return 'rgba(' + r + ',' + g + ',' + b + ', 0.7)';
+    }
+      // Data
+    var architectures = ['CNN', 'CNN', 'CNN', 'CNN', 'CNN', 'CNN', 'ViT', 'ViT', 'ViT', 'ViT', 'ViT', 'ViT'];
+    var pts_styles = ['triangle', 'triangle', 'triangle', 'triangle', 'triangle', 'triangle', 'square', 'square', 'square', 'square', 'square', 'square'];
+    var nombreParametres = [59, 0.59, 59, 72, 55, 59, 132, 470, 471, 475, 471, 475];
+    var miouResultats = [56.81, 59.27, 60.34, 60.49, 60.33, 60.29, 62.52, 62.86, 62.95, 62.58, 63.75, 62.13];
+    var typesArchitecture = ['ResNet 101 - RGB', 'ResNet 101 - RGB-IR-E', 'ResNet 101 - RGB-IR-E-meta',
+                              'HRNet 48 - RGB-IR-E-meta', 'Xception 65 - RGB-IR-E-meta', 'ResNet 101 - RGB-IR-E-meta double res',
+                              'Base Mask2Former - RGB', 'Large UperNet - RGB', 'Large UperNet - RGB-IR-E',
+                              'Large UperNet - RGB-IR-E-meta', 'Large UperNet - RGB-IR-E-meta split season',
+                              'Large UperNet - RGB-IR-E-meta-climat'];
+
+    // Prepare data for Chart.js
+    var datasetsCNN = [];
+    var datasetsVIT = [];
+    for (var i = 0; i < typesArchitecture.length; i++) {
+      var randomColor = getRandomColor();
+      var dataset = {
+        label: architectures[i] +' - ' + typesArchitecture[i],
+        data: [{ x: nombreParametres[i], y: miouResultats[i]/100 }],
+        backgroundColor: randomColor,
+        pointStyle: pts_styles[i],
+        pointRadius: 10, // Set point radius as needed
+        pointHoverRadius: 30 // Set hover radius as needed
+      };
+      // Assign datasets to the corresponding list
+      if (i < 6) {
+        datasetsCNN.push(dataset);
+      } else {
+        datasetsVIT.push(dataset);
+      }
+    }
+    //option
+    var options = {
+      responsive: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels : {font: { size: fontSize }},
+          },
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            position: 'bottom',
+            ticks : {font: { size: fontSize }},
+            title: {
+              display: true,
+              text: 'Number of Parameters (million)',
+              font: { size: fontSize }
+            }
+          },
+          y: {
+            type: 'linear',
+            position: 'left',
+            ticks : {font: { size: fontSize }},
+            title: {
+              display: true,
+              text: 'mIoU',
+              font: { size: fontSize }
+            }
+          }
+        }
+      };
+    // Chart configuration
+    var config = {
+      type: 'scatter',
+      data: {
+        datasets: datasetsCNN
+      },
+      options: options
+    };
+    // Create the scatter plot
+    let scatter_chart = new Chart(ctx_scatter, config);
+
+    let dataset_heig_stdl = {
+      label: 'HEIG-Vd',
+      data: [0.854, 0.129, 0.695, 0.003, 0.091, 0.575, 0.755],
+    }
+    let dataset_ofs_stdl = {
+      label: 'OFS_ADELE2(+SAM)',
+      data: [0.74, 0, 0.588, 0, 0.23, 0.757, 0.834]
+    }
+    let dataset_ign_stdl = {
+      label: 'IGN_smp-unet-resnet34-imagenet_RVBIE',
+      data: [0.77, 0.09, 0.536, 0.006, 0.076, 0.764, 0.816]
+    }
+    let label_stdl = ["batiment", "surface_non_beton", "surface_beton", "eau_bassin", "roche_dure_meuble", "eau_naturelle", "sol_vegetalise"]
+
+    let data_bar_stdl = {
+      labels: label_stdl,
+      datasets: [dataset_heig_stdl, dataset_ofs_stdl, dataset_ign_stdl]
+    };
+    chart_bar_1 = new Chart(ctx_bar_1, {
+          type: 'bar',
+          data: data_bar_stdl,
+          options: options_bar
+        });
+    var heig_stdl_mean = 0.39; //388
+    var ofs_stdl_mean = 0.39; //394
+    var ign_stdl_mean = 0.34;
+
+
+  </script>
+
+
+  </body>
+</html>

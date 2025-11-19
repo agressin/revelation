@@ -1,0 +1,259 @@
+<!doctype html>
+<html>
+  <head>
+    <!-- Metadata about the presentation -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>{{ meta.title }}</title>
+
+    <meta name="description" content="{{ meta.description }}">
+    <meta name="author" content="{{ meta.author }}">
+
+    <!-- Presentation Styles -->
+    <link rel="stylesheet" href="{{ static_revealjs }}/reset.css">
+    <link rel="stylesheet" href="{{ static_revealjs }}/reveal.css">
+    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/toc-progress/toc-progress.css">
+
+    <!-- leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+    .leaflet-control  { display:none;}
+    </style>
+
+    {% if theme %}
+      <link rel="stylesheet" href="{{ theme }}" id="theme">
+    {% endif %}
+
+    {% if style %}
+      <link rel="stylesheet" href="{{ style }}" id="style">
+    {% endif %}
+
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/highlight/monokai.css" id="highlight-theme">
+
+  </head>
+
+  <body>
+    <!-- Presentation body -->
+    <div class="reveal">
+      <img class="logo" src="{{ static_revealjs }}/images/logo-heig-vd.svg" alt="">
+	  <img class="logo-right" src="{{ static_revealjs }}/images/logo-{{ logo }}.png" alt="{{ logo }}">
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+        {% for section in slides %}
+          {% if section|length > 1 %}
+            <section>
+              {% for slide in section %}
+                <section data-markdown>
+                  <textarea data-template>
+                    {{ slide|safe }}
+                  </textarea>
+                </section>
+              {% endfor %}
+            </section>
+          {% else %}
+            {% for slide in section %}
+              <section data-markdown>
+                <textarea data-template>
+                  {{ slide|safe }}
+                </textarea>
+              </section>
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+      </div>
+
+    </div>
+    {% if licence %}
+      <a rel="license" href="http://creativecommons.org/licenses/{{ licence }}/4.0/">
+          <img alt="Creative Commons License" style="border-width:0;position:absolute;bottom:5px;right:150px;" src="https://i.creativecommons.org/l/{{ licence }}/4.0/88x31.png" />
+      </a>
+    {% endif %}
+
+
+    <!-- Reveal.js script -->
+    <script src="{{ static_revealjs }}/reveal.js"></script>
+
+    <!-- Reveal.js plugins -->
+    <script src="{{ static_revealjs }}/plugin/markdown/markdown.js"></script>
+    <script src="{{ static_revealjs }}/plugin/highlight/highlight.js"></script>
+    <script src="{{ static_revealjs }}/plugin/notes/notes.js"></script>
+    <script src="{{ static_revealjs }}/plugin/math/math.js"></script>
+
+    <!-- leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- chartjs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    
+    <script>
+
+      Reveal.initialize({
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealMath,
+        ],
+		dependencies:
+		[ ]
+      });
+
+      Reveal.configure({{ config|tojson }});
+      
+      <!-- Chart -->
+
+      Reveal.on( 'slidechanged', event => {
+      // event.previousSlide, event.currentSlide, event.indexh, event.indexv
+        console.log("slidechanged", event );
+        //:
+        if ((event.indexh === 2) && (event.indexv === 4)){
+          cocoChart.destroy()
+          cocoChart = new Chart(ctx, config);
+        }
+      } );
+
+      Reveal.on( 'fragmentshown', event => {
+        console.log("fragmentshown", event.fragment );
+        
+        if (event.fragment.getAttribute("id")=== "fr-2"){
+          //map_fribourg.flyTo([46.79925, 7.15171], 20, {animate: true, duration: 3});
+        }
+        });
+    </script>
+
+  <script>
+<!-- charjs-->
+      Chart.register(ChartDataLabels);
+      let fontSize = 25;
+      const ctx = document.getElementById('cocoChart').getContext('2d');
+      const data = {
+            labels: [
+                "2015-04-30", "2015-12-08", "2015-12-10", "2016-12-09", "2016-12-20",
+                "2017-03-17", "2017-03-20", "2017-08-07", "2017-11-18", "2017-11-22",
+                "2018-05-23", "2018-09-18", "2019-01-07", "2019-06-26", "2019-09-09",
+                "2020-04-19", "2020-06-03", "2020-11-16", "2020-12-13", "2021-03-25",
+                "2021-06-15", "2021-06-16", "2021-11-18", "2022-03-07", "2022-03-22",
+                "2022-11-07", "2022-11-10", "2022-11-22"
+            ],
+            datasets: [{
+                label: 'Object Detection on COCO',
+                data: [
+                    {x: "2015-04-30", y: 19.7, name: "Fast-RCNN"},
+                    //{x: "2015-12-08", y: 28.8, name: "SSD512"},
+                    {x: "2015-12-10", y: 34.9, name: "Faster R-CNN"},
+                    {x: "2016-12-09", y: 36.2, name: "Faster R-CNN + FPN"},
+                    //{x: "2016-12-20", y: 36.8, name: "Faster R-CNN + TDM"},
+                    //{x: "2017-03-17", y: 37.5, name: "DeformConv-R-FCN"},
+                    {x: "2017-03-20", y: 39.8, name: "Mask R-CNN"},
+                    //{x: "2017-08-07", y: 40.8, name: "RetinaNet"},
+                    //{x: "2017-11-18", y: 41.8, name: "RefineDet512+"},
+                    {x: "2017-11-22", y: 45.7, name: "D-RFCN + SNIP"},
+                    //{x: "2018-05-23", y: 46.1, name: "SNIPER"},
+                    //{x: "2018-09-18", y: 47.4, name: "PANet"},
+                    {x: "2019-01-07", y: 48.4, name: "TridentNet"},
+                    //{x: "2019-06-26", y: 50.7, name: "NAS-FPN"},
+                    //{x: "2019-09-09", y: 53.3, name: "Cascade Mask R-CNN"},
+                    {x: "2020-04-19", y: 53.3, name: "ResNeSt-200"},
+                    //{x: "2020-06-03", y: 55.7, name: "DetectoRS"},
+                    {x: "2020-11-16", y: 55.8, name: "YOLOv4-P7"},
+                    //{x: "2020-12-13", y: 57.3, name: "Cascade Eff-B7 NAS-FPN"},
+                    {x: "2021-03-25", y: 58.7, name: "Swin-L"},
+                    //{x: "2021-06-15", y: 60.6, name: "DyHead"},
+                    //{x: "2021-06-16", y: 61.3, name: "Soft Teacher + Swin-L"},
+                    //{x: "2021-11-18", y: 63.1, name: "SwinV2-G"},
+                    {x: "2022-03-07", y: 63.3, name: "DINO"},
+                    //{x: "2022-03-22", y: 64.4, name: "FocalNet-H"},
+                    //{x: "2022-11-07", y: 64.5, name: "Group DETR v2"},
+                    //{x: "2022-11-10", y: 65.4, name: "InternImage-H"},
+                    {x: "2022-11-22", y: 66.0, name: "Co-DETR"},
+                    {x: "2023-03-22", y: 66.0, name: ""}
+                ],
+                borderColor: '#21ccc7',
+                fill: true,
+                tension: 0.2,
+                parsing: {
+                    xAxisKey: 'x',
+                    yAxisKey: 'y'
+                },
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointBackgroundColor: '#21ccc7',
+                pointHoverBackgroundColor: '#ff6384',
+                showLine: true
+            },
+            ]
+        };
+
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        font: { size: fontSize },
+                        time: {
+                            unit: 'year'
+                        },
+                        title: {
+                            display: true,
+                            font: { size: fontSize },
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                    font: { size: fontSize },
+                        title: {
+                            display: true,
+                            font: { size: fontSize },
+                            text: 'box mAP'
+
+                        },
+                        min: -5.5,
+                        max: 72.5
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        font: { size: fontSize },
+                        text: 'SOTA Methods - Object Detection on COCO (paperswithcode)'
+                    },
+                    legend: {
+                        font: { size: fontSize },
+                        display: false // Hides the legend entirely
+                    },
+                    datalabels: {
+                        align: 'top',
+                        anchor: 'end',
+                        font: { size: fontSize },
+                        formatter: function(value, context) {
+                            return value.name;  // Display method name as label
+                        },
+                    },
+                    tooltip: {
+                        font: { size: fontSize },
+                        callbacks: {
+                            title: function(context) {
+                                // Use the 'name' field as the title
+                                return context[0].raw.name;
+                            },
+                            label: function(context) {
+                                let label = 'mAp ';
+                                label += context.raw.y || '%';
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        let cocoChart = new Chart(ctx, config);
+
+  </script>
+
+
+  </body>
+</html>
