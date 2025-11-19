@@ -11,10 +11,11 @@ import re
 import glob
 import warnings
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 from geventwebsocket import WebSocketApplication
 from jinja2 import Environment, PackageLoader, select_autoescape
-from watchdog.events import FileSystemEventHandler
+from watchdog.events import FileSystemEventHandler, FileSystemEvent
 from watchdog.observers import Observer
 from werkzeug.wrappers import Request, Response
 # from werkzeug.wsgi import SharedDataMiddleware
@@ -24,7 +25,7 @@ from .config import Config
 from .utils import normalize_newlines
 
 
-class Revelation(object):
+class Revelation:
     """
     Main revelation app class that instantiates the server and handles
     the requests
@@ -32,13 +33,13 @@ class Revelation(object):
 
     def __init__(
         self,
-        presentation,
-        config=None,
-        media=None,
-        theme=None,
-        style=None,
-        reloader=False,
-    ):
+        presentation: str,
+        config: Optional[str] = None,
+        media: Optional[str] = None,
+        theme: Optional[str] = None,
+        style: Optional[str] = None,
+        reloader: bool = False,
+    ) -> None:
         """
         Initializes the server and creates the environment for the presentation
 
@@ -75,15 +76,24 @@ class Revelation(object):
         if style:
             validated_style = self._validate_path(style, "style", must_exist=True, is_file=True)
             if validated_style:
-                self.style = os.path.basename(validated_style)
+                self.style: Optional[str] = os.path.basename(validated_style)
                 shared_data.update(self.parse_shared_data(validated_style))
+            else:
+                self.style = None
         else:
             self.style = None
 
-        self.wsgi_app = SharedDataMiddleware(self.wsgi_app, shared_data)
+        # Create WSGI middleware wrapper
+        wsgi_app_func = self.wsgi_app
+        self.wsgi_app = SharedDataMiddleware(wsgi_app_func, shared_data)  # type: ignore[method-assign]
 
     @staticmethod
-    def _validate_path(path, path_type, must_exist=True, is_file=False):
+    def _validate_path(
+        path: Optional[str],
+        path_type: str,
+        must_exist: bool = True,
+        is_file: Optional[bool] = False,
+    ) -> Optional[str]:
         """
         Validate and sanitize file/directory paths to prevent path traversal attacks
 
@@ -91,10 +101,10 @@ class Revelation(object):
             path: The path to validate
             path_type: Description of path type (for error messages)
             must_exist: Whether the path must exist
-            is_file: Whether the path should be a file (vs directory)
+            is_file: Whether the path should be a file (vs directory), None for either
 
         Returns:
-            str: Absolute validated path, or None if validation fails
+            Absolute validated path, or None if validation fails
 
         Raises:
             ValueError: If path contains suspicious patterns or fails validation
@@ -142,9 +152,15 @@ class Revelation(object):
 
         return str(path_obj)
 
-    def parse_shared_data(self, shared_root):
+    def parse_shared_data(self, shared_root: Optional[str]) -> Dict[str, str]:
         """
-        Parse aditional shared_data if it exists
+        Parse additional shared_data if it exists
+
+        Args:
+            shared_root: Path to shared data directory
+
+        Returns:
+            Dictionary mapping URL paths to filesystem paths
         """
         if shared_root:
             shared_root = os.path.abspath(shared_root)
@@ -156,7 +172,12 @@ class Revelation(object):
 
         return {}
 
-    def load_slides(self, path, section_separator, vertical_separator):
+    def load_slides(
+        self,
+        path: str,
+        section_separator: str,
+        vertical_separator: str
+    ) -> List[List[str]]:
         """
         Get slides file from the given path, loads it and split into list
         of slides.
@@ -167,12 +188,13 @@ class Revelation(object):
             vertical_separator: Regex pattern for vertical slide separator
 
         Returns:
-            List of lists containing slide content
+            List of lists containing slide content (nested structure for vertical slides)
 
         Raises:
             FileNotFoundError: If no presentation files found
             IOError: If files cannot be read
             UnicodeDecodeError: If files contain invalid UTF-8
+            ValueError: If separator regex patterns are invalid
         """
         if os.path.isfile(path):
             lst_path = [path]
@@ -221,8 +243,17 @@ class Revelation(object):
                 f"Error: {e}"
             )
 
-    def get_theme(self, theme):
-        reveal_theme = "static/revealjs/theme/{}.css".format(theme)
+    def get_theme(self, theme: str) -> str:
+        """
+        Get theme CSS path, checking if it's a built-in theme
+
+        Args:
+            theme: Theme name or custom path
+
+        Returns:
+            Theme CSS path (relative or custom)
+        """
+        reveal_theme = f"static/revealjs/theme/{theme}.css"
         fullpath_theme = os.path.join(os.path.dirname(__file__), reveal_theme)
 
         if os.path.isfile(fullpath_theme):
@@ -230,7 +261,7 @@ class Revelation(object):
 
         return theme
 
-    def dispatch_request(self, request):
+    def dispatch_request(self, request: Request) -> Response:
         """
         Handle HTTP requests and render the presentation
 
@@ -251,11 +282,11 @@ class Revelation(object):
 
             # Load slides with proper error handling
             try:
-                slides = self.load_slides(
-                    self.presentation,
-                    self.config.get("REVEAL_SLIDE_SEPARATOR"),
-                    self.config.get("REVEAL_VERTICAL_SLIDE_SEPARATOR"),
-                )
+                presentation_path = self.presentation if self.presentation else ""
+                section_sep = str(self.config.get("REVEAL_SLIDE_SEPARATOR", "---"))
+                vertical_sep = str(self.config.get("REVEAL_VERTICAL_SLIDE_SEPARATOR", "--"))
+
+                slides = self.load_slides(presentation_path, section_sep, vertical_sep)
             except (FileNotFoundError, IOError, UnicodeDecodeError, ValueError) as e:
                 error_msg = f"Error loading presentation slides: {e}"
                 return Response(
@@ -268,7 +299,7 @@ class Revelation(object):
                 "meta": self.config.get("REVEAL_META"),
                 "slides": slides,
                 "config": self.config.get("REVEAL_CONFIG"),
-                "theme": self.get_theme(self.config.get("REVEAL_THEME")),
+                "theme": self.get_theme(str(self.config.get("REVEAL_THEME", "black"))),
                 "style": self.style,
                 "reloader": self.reloader,
                 "static_revealjs": "static/revealjs",
@@ -312,13 +343,24 @@ class Revelation(object):
                 headers={"content-type": "text/html"}
             )
 
-    def wsgi_app(self, environ, start_response):
+    def wsgi_app(self, environ: Dict[str, Any], start_response: Any) -> Any:
+        """
+        WSGI application interface
+
+        Args:
+            environ: WSGI environment dict
+            start_response: WSGI start_response callable
+
+        Returns:
+            WSGI response
+        """
         request = Request(environ)
         response = self.dispatch_request(request)
 
         return response(environ, start_response)
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: Dict[str, Any], start_response: Any) -> Any:
+        """Make the app callable as WSGI application"""
         return self.wsgi_app(environ, start_response)
 
 
@@ -328,13 +370,25 @@ class PresentationReloadWebSocketSendEvent(FileSystemEventHandler):
     when a tracked file changes
     """
 
-    def __init__(self, ws):
+    def __init__(self, ws: Any) -> None:
+        """
+        Initialize event handler with WebSocket
+
+        Args:
+            ws: WebSocket connection object
+        """
         self.ws = ws
 
-    def on_modified(self, event):
-        """Handle file modification events"""
+    def on_modified(self, event: FileSystemEvent) -> None:
+        """
+        Handle file modification events
+
+        Args:
+            event: File system event object
+        """
         try:
-            if event.src_path.endswith((".md", ".css")) and not self.ws.closed:
+            src_path = str(event.src_path)
+            if src_path.endswith((".md", ".css")) and not self.ws.closed:
                 self.ws.send(
                     json.dumps({"msg_type": "message", "message": "reload"})
                 )
@@ -346,14 +400,21 @@ class PresentationReloadWebSocketSendEvent(FileSystemEventHandler):
 class PresentationReloader(WebSocketApplication):
     """WebSocket to notify the frontend on file changes with proper resource cleanup"""
 
-    tracking_path = None
+    tracking_path: Optional[str] = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """
+        Initialize WebSocket reloader
+
+        Args:
+            *args: Positional arguments for WebSocketApplication
+            **kwargs: Keyword arguments for WebSocketApplication
+        """
         super().__init__(*args, **kwargs)
-        self.observer = None
-        self.event_handler = None
+        self.observer: Optional[Any] = None  # Observer type is complex
+        self.event_handler: Optional[PresentationReloadWebSocketSendEvent] = None
 
-    def on_open(self):
+    def on_open(self) -> None:
         """Initialize file system observer when WebSocket opens"""
         if self.tracking_path:
             try:
@@ -375,12 +436,24 @@ class PresentationReloader(WebSocketApplication):
                 self.observer = None
                 self.event_handler = None
 
-    def on_message(self, message, *args, **kwargs):
-        """Handle incoming WebSocket messages (currently unused)"""
+    def on_message(self, message: Any, *args: Any, **kwargs: Any) -> None:
+        """
+        Handle incoming WebSocket messages (currently unused)
+
+        Args:
+            message: Incoming message
+            *args: Additional positional arguments
+            **kwargs: Additional keyword arguments
+        """
         pass
 
-    def on_close(self, reason):
-        """Clean up resources when WebSocket closes"""
+    def on_close(self, reason: Any) -> None:
+        """
+        Clean up resources when WebSocket closes
+
+        Args:
+            reason: Close reason
+        """
         if self.observer:
             try:
                 self.observer.stop()
