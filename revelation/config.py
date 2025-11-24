@@ -127,6 +127,23 @@ class Config(dict):
 
             self[upper_key] = value
 
+        # Handle config keys nested in reveal_meta (common user mistake in TOML)
+        # Extract them to root level where they belong
+        reveal_meta = self.get("REVEAL_META", {})
+        if isinstance(reveal_meta, dict):
+            keys_to_extract = [
+                "reveal_licence",
+                "reveal_slide_separator",
+                "reveal_vertical_slide_separator",
+                "reveal_theme",
+                "reveal_theme_logo",
+                "reveal_template",
+            ]
+            for key in keys_to_extract:
+                upper_key = key.upper()
+                if key in reveal_meta:
+                    self[upper_key] = reveal_meta.pop(key)
+
     def _validate_config_value(self, key, value):
         """Validate configuration value types
 
