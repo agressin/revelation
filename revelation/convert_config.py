@@ -106,16 +106,9 @@ def config_to_toml(config: Dict[str, Any]) -> str:
         else:
             simple_values[key] = value
 
-    # Write metadata section first if present
-    if 'REVEAL_META' in dict_values:
-        lines.append("# Presentation metadata")
-        lines.append("[reveal_meta]")
-        for k, v in dict_values['REVEAL_META'].items():
-            lines.append(f"{k} = {python_value_to_toml(v)}")
-        lines.append("")
-        del dict_values['REVEAL_META']
-
-    # Write simple configuration values
+    # Write simple configuration values first: in TOML, a key written after
+    # a [table] header belongs to that table, so top-level keys must come
+    # before any table.
     if simple_values:
         lines.append("# Basic configuration")
         for key, value in sorted(simple_values.items()):
@@ -123,6 +116,15 @@ def config_to_toml(config: Dict[str, Any]) -> str:
             toml_value = python_value_to_toml(value)
             lines.append(f"{toml_key} = {toml_value}")
         lines.append("")
+
+    # Then the metadata table
+    if 'REVEAL_META' in dict_values:
+        lines.append("# Presentation metadata")
+        lines.append("[reveal_meta]")
+        for k, v in dict_values['REVEAL_META'].items():
+            lines.append(f"{k} = {python_value_to_toml(v)}")
+        lines.append("")
+        del dict_values['REVEAL_META']
 
     # Write reveal_config section if present
     if 'REVEAL_CONFIG' in dict_values:

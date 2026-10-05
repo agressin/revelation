@@ -3,6 +3,7 @@
 import glob
 import os
 import shutil
+import sys
 import webbrowser
 from functools import partial
 
@@ -30,6 +31,43 @@ LOCAL_HOSTNAMES = ("localhost", "127.0.0.1", "::1")
 
 # DRY form for echoing errors
 error_echo = partial(click.secho, err=True, fg="red", bold=True)
+
+
+def warn_if_py_config_newer(py_config, toml_config):
+    """Warn when config.py was modified after config.toml
+
+    config.toml always wins when both exist, so recent edits made in
+    config.py would be silently ignored.
+    """
+    if not (os.path.isfile(py_config) and os.path.isfile(toml_config)):
+        return False
+    if os.path.getmtime(py_config) <= os.path.getmtime(toml_config):
+        return False
+    # Same values (e.g. both saved together): nothing is lost, stay quiet.
+    # config.py is parsed with ast, never executed here.
+    try:
+        from pathlib import Path
+        from revelation.config import Config
+        from revelation.convert_config import extract_config_from_python
+        py_values = extract_config_from_python(Path(py_config))
+        toml_values = Config(toml_config)
+        if all(
+            toml_values.get(key) == value
+            for key, value in py_values.items()
+            if key in Config.ALLOWED_CONFIG_KEYS
+        ):
+            return False
+    except Exception:
+        pass  # unreadable file: warn anyway
+    click.secho(
+        f"⚠️  Warning: {py_config} is newer than {toml_config}.\n"
+        f"   config.toml is used, changes made in config.py are ignored.\n"
+        f"   If config.py is the up-to-date one, regenerate the TOML file "
+        f"(overwrites it):\n"
+        f"   $ revelation convertconfig {py_config} --force\n",
+        err=True, fg="yellow",
+    )
+    return True
 
 
 @click.group(invoke_without_command=True)
@@ -242,6 +280,7 @@ def mkstatic(
 
         if os.path.isfile(toml_config):
             config = toml_config
+            warn_if_py_config_newer(py_config, toml_config)
         elif os.path.isfile(py_config):
             config = py_config
             click.echo("\n⚠️  Note: Using deprecated Python config. Consider converting to TOML.")
@@ -403,6 +442,7 @@ def start(ctx, presentation, port, config, media, theme, style, debug, hostname,
 
         if os.path.isfile(toml_config):
             config = toml_config
+            warn_if_py_config_newer(py_config, toml_config)
         elif os.path.isfile(py_config):
             config = py_config
             # Suggest conversion from Python to TOML
@@ -411,7 +451,11 @@ def start(ctx, presentation, port, config, media, theme, style, debug, hostname,
             click.echo(f"\n   Quick conversion:")
             click.echo(f"   $ revelation convertconfig {py_config}\n")
 
-            if click.confirm("Would you like to convert now?", default=False):
+            # Only ask when someone can answer: a non-interactive launch
+            # (script, editor, background) keeps the default (no conversion)
+            if sys.stdin.isatty() and click.confirm(
+                "Would you like to convert now?", default=False
+            ):
                 from pathlib import Path
                 if convert_config(Path(py_config), Path(toml_config), force=False):
                     click.echo(f"\n✓ Converted to {toml_config}")

@@ -127,8 +127,10 @@ class Config(dict):
 
             self[upper_key] = value
 
-        # Handle config keys nested in reveal_meta (common user mistake in TOML)
-        # Extract them to root level where they belong
+        # Handle config keys nested in reveal_meta: written by hand, or by
+        # convertconfig before it put top-level keys ahead of the tables
+        # (those files have them under [reveal_meta]). Extract them to root
+        # level where they belong; they take precedence, as before.
         reveal_meta = self.get("REVEAL_META", {})
         if isinstance(reveal_meta, dict):
             keys_to_extract = [
