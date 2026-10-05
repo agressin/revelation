@@ -9,6 +9,7 @@ from unittest.mock import patch, MagicMock
 
 from click.testing import CliRunner
 
+import revelation
 from revelation.cli import cli
 
 
@@ -24,7 +25,7 @@ class CliExtendedTestCase(TestCase):
         """Test --version flag"""
         result = self.runner.invoke(cli, ['--version'])
         self.assertEqual(result.exit_code, 0)
-        self.assertIn('1.1.0', result.output)
+        self.assertIn(revelation.__version__, result.output)
 
     def test_help_command(self):
         """Test help output"""

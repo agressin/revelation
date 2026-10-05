@@ -28,7 +28,8 @@ REVEAL_THEME = "heig_ec+g"
 REVEAL_THEME_LOGO = "master"
 
 # Templates
-# presentation.html, myPresentation.html
+# myPresentation.html (par défaut, reveal.js 5.x) ou un template spécialisé
+# de revelation/templates/ (ex. presentation_lidar.html)
 REVEAL_TEMPLATE = "myPresentation.html"
 
 REVEAL_CONFIG = {

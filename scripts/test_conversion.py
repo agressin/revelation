@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""Standalone test script for config conversion"""
+"""Standalone smoke-test script for config conversion. À lancer depuis la
+racine du dépôt : uv run --no-project scripts/test_conversion.py"""
 
 import sys
 from pathlib import Path
 
-# Add revelation to path
-sys.path.insert(0, str(Path(__file__).parent))
+# Racine du dépôt (scripts/ est un niveau sous la racine) : pour importer revelation
+RACINE = Path(__file__).parent.parent
+sys.path.insert(0, str(RACINE))
 
 from revelation.convert_config import convert_config
 
 if __name__ == '__main__':
-    python_file = Path('example_slides/config.py')
-    output_file = Path('example_slides/config_test.toml')
+    python_file = RACINE / 'example_slides/config.py'
+    output_file = RACINE / 'example_slides/config_test.toml'
 
     print(f"Converting {python_file} to {output_file}...")
 

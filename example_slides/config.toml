@@ -25,7 +25,8 @@ reveal_theme_logo = "ggt"
 reveal_licence = "by-sa"
 
 # Template file to use
-# Options: presentation.html, myPresentation.html
+# myPresentation.html (default, reveal.js 5.x) or a specialized template
+# from revelation/templates/ (e.g. presentation_lidar.html)
 reveal_template = "myPresentation.html"
 
 # Reveal.js configuration options

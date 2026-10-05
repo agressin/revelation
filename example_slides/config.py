@@ -37,7 +37,8 @@ REVEAL_LICENCE="by-sa"
 
 
 # Templates
-# presentation.html, myPresentation.html
+# myPresentation.html (par défaut, reveal.js 5.x) ou un template spécialisé
+# de revelation/templates/ (ex. presentation_lidar.html)
 REVEAL_TEMPLATE = "myPresentation.html"
 
 REVEAL_CONFIG = {

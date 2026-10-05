@@ -93,12 +93,12 @@ def test_client_request_ok(revelation_app):
 
 def test_client_with_reload(tests_folder, media_folder):
     """Test that reloader script is included when enabled"""
-    # Create slide and config with presentation.html template
+    # Create slide and config with myPresentation.html template
     slide = tests_folder / "slides.md"
     slide.write_text("# Test")
 
     config_file = tests_folder / "config.py"
-    config_file.write_text('REVEAL_TEMPLATE = "presentation.html"')
+    config_file.write_text('REVEAL_TEMPLATE = "myPresentation.html"')
 
     app = Revelation(str(slide), config=str(config_file), media=str(media_folder), reloader=True)
     client = Client(app, Response)
