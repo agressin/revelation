@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8">
     <title>{{ meta.title }}</title>
@@ -12,7 +12,6 @@
 
     <!-- Plugins tiers (css) -->
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/title-footer/title-footer.css">
-    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/toc-progress/toc-progress.css">
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/timetimer/timetimer.css">
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/chalkboard/style.css">
     <style>
@@ -79,6 +78,7 @@
     <script src="{{ static_revealjs }}/plugin/menu/menu.js"></script>
     <script src="{{ static_revealjs }}/plugin/timetimer/timetimer.js"></script>
     <script src="{{ static_revealjs }}/plugin/chalkboard/plugin.js"></script>
+    <script src="{{ static_revealjs }}/plugin/title-footer/title-footer.js"></script>
 
     <script>
       // Options de ce template. La config du cours (REVEAL_CONFIG) est
@@ -132,13 +132,6 @@
           ]
         },
         //
-        dependencies: [
-          //{ src: '{{ static_revealjs }}/plugin/menu/menu.js', async: true, condition: function() { return !!document.body.classList; } },
-          { src: '{{ static_revealjs }}/plugin/title-footer/title-footer.js', async: true, callback: function() { title_footer.initialize(); } },
-          // { src: '{{ static_revealjs }}/plugin/toc-progress/toc-progress.js', async: true, callback: function() { toc_progress.initialize(); toc_progress.create(); } },
-        ],
-
-        //
         plugins: [
           RevealMarkdown,
           RevealHighlight,
@@ -154,6 +147,12 @@
 
       // La config du cours (REVEAL_CONFIG) prime sur les options ci-dessus.
       Reveal.initialize(Object.assign({}, revealOptions, {{ config|tojson }}));
+
+      // Pied de page avec le titre (title-footer.js est un script simple,
+      // pas un plugin reveal.js : on l'initialise une fois Reveal prêt).
+      Reveal.on('ready', function () {
+        title_footer.initialize();
+      });
 
       // Actions du menu « Outils » : fermer le menu, puis agir.
       function heigOutil(action) {
