@@ -11,3 +11,6 @@ dist/
 *.tar.gz
 *.zip
 ngrok
+
+# sortie générée par test_conversion.py
+example_slides/config_test.toml
