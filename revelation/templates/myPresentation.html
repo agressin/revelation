@@ -79,8 +79,11 @@
     <script src="{{ static_revealjs }}/plugin/chalkboard/plugin.js"></script>
 
     <script>
-      
-      Reveal.initialize({
+      // Options de ce template. La config du cours (REVEAL_CONFIG) est
+      // fusionnée par-dessus et a le dernier mot (largeur/hauteur,
+      // transitions, etc.) : plus d'appel Reveal.configure() séparé après
+      // coup, tout part dans Reveal.initialize().
+      var revealOptions = {
         controls: true,
         progress: true,
         history: true,
@@ -143,7 +146,10 @@
           RevealTimeTimer,
           RevealChalkboard,
         ],
-      });
+      };
+
+      // La config du cours (REVEAL_CONFIG) prime sur les options ci-dessus.
+      Reveal.initialize(Object.assign({}, revealOptions, {{ config|tojson }}));
 
       // Actions du menu « Outils » : fermer le menu, puis agir.
       function heigOutil(action) {
@@ -157,9 +163,6 @@
         }, 150);
         return false;
       }
-
-      // Ta config additionnelle
-      Reveal.configure({{ config|tojson }});
     </script>
     {% if reloader %}
     <!-- Rechargement automatique : le serveur (revelation start) notifie par
