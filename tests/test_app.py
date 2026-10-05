@@ -112,3 +112,33 @@ def test_client_without_reload(slide_file, media_folder):
     client = Client(app, Response)
     response = client.get("/")
     assert "reloader" not in response.data.decode("utf8")
+
+
+def test_default_template_is_mypresentation(tests_folder):
+    """Without REVEAL_TEMPLATE, the reveal.js 5.x template is used"""
+    slide = tests_folder / "slides.md"
+    slide.write_text("# Test")
+    config_file = tests_folder / "config.toml"
+    config_file.write_text('[reveal_meta]\ntitle = "T"\n')
+
+    app = Revelation(str(slide), config=str(config_file))
+    app.config.pop("REVEAL_TEMPLATE", None)
+    response = Client(app, Response).get("/")
+    assert response.status_code == 200
+    assert "RevealTimeTimer" in response.data.decode("utf8")
+
+
+def test_missing_template_returns_explicit_error(tests_folder):
+    """An unknown REVEAL_TEMPLATE gives a readable 500, not a silent fallback"""
+    slide = tests_folder / "slides.md"
+    slide.write_text("# Test")
+    config_file = tests_folder / "config.toml"
+    config_file.write_text('reveal_template = "nope.html"\n')
+
+    app = Revelation(str(slide), config=str(config_file))
+    with pytest.warns(UserWarning, match="nope.html"):
+        response = Client(app, Response).get("/")
+    body = response.data.decode("utf8")
+    assert response.status_code == 500
+    assert "nope.html" in body
+    assert "myPresentation.html" in body

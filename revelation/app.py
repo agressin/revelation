@@ -14,7 +14,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from geventwebsocket import WebSocketApplication
-from jinja2 import Environment, PackageLoader, select_autoescape
+from jinja2 import Environment, PackageLoader, TemplateNotFound, select_autoescape
+from markupsafe import escape
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
 from watchdog.observers import Observer
 from werkzeug.wrappers import Request, Response
@@ -23,6 +24,9 @@ from werkzeug.middleware.shared_data import SharedDataMiddleware
 
 from .config import Config
 from .utils import normalize_newlines
+
+# Template used when REVEAL_TEMPLATE is not set (reveal.js 5.x layout)
+DEFAULT_TEMPLATE = "myPresentation.html"
 
 
 class Revelation:
@@ -307,17 +311,26 @@ class Revelation:
                 "licence": self.config.get("REVEAL_LICENCE"),
             }
 
-            template_file = self.config.get("REVEAL_TEMPLATE")
-            if template_file is None:
-                template_file = "presentation.html"
+            template_file = self.config.get("REVEAL_TEMPLATE") or DEFAULT_TEMPLATE
 
             try:
                 template = env.get_template(template_file)
-            except Exception as e:
-                error_msg = f"Template '{template_file}' not found: {e}"
+            except TemplateNotFound:
+                # No silent fallback: another template would render a blank
+                # page (different reveal.js layout), which is harder to debug.
+                available = ", ".join(sorted(env.list_templates(extensions=["html"])))
+                error_msg = (
+                    f"Template '{template_file}' (REVEAL_TEMPLATE) not found.\n"
+                    f"Available templates: {available}\n"
+                    f"Fix REVEAL_TEMPLATE in your config, or remove it to use "
+                    f"the default ({DEFAULT_TEMPLATE})."
+                )
                 warnings.warn(error_msg, UserWarning)
-                # Fallback to default template
-                template = env.get_template("presentation.html")
+                return Response(
+                    f"<html><body><h1>Template Not Found</h1><pre>{escape(error_msg)}</pre></body></html>",
+                    status=500,
+                    headers={"content-type": "text/html"}
+                )
 
             try:
                 rendered = template.render(**context)
