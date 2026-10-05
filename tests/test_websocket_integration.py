@@ -110,7 +110,7 @@ class WebSocketReloadTestCase(TestCase):
         """Test PresentationReloader initializes properly"""
         mock_ws = Mock()
 
-        reloader = PresentationReloader(mock_ws, None, None, None)
+        reloader = PresentationReloader(mock_ws)
 
         self.assertIsNone(reloader.observer)
         self.assertIsNone(reloader.event_handler)
@@ -120,7 +120,7 @@ class WebSocketReloadTestCase(TestCase):
         mock_ws = Mock()
         mock_ws.closed = False
 
-        reloader = PresentationReloader(mock_ws, None, None, None)
+        reloader = PresentationReloader(mock_ws)
         reloader.tracking_path = self.tracking_path
 
         reloader.on_open()
@@ -136,7 +136,7 @@ class WebSocketReloadTestCase(TestCase):
         """Test that reloader doesn't start if tracking_path is None"""
         mock_ws = Mock()
 
-        reloader = PresentationReloader(mock_ws, None, None, None)
+        reloader = PresentationReloader(mock_ws)
         reloader.tracking_path = None
 
         reloader.on_open()
@@ -149,17 +149,18 @@ class WebSocketReloadTestCase(TestCase):
         mock_ws = Mock()
         mock_ws.closed = False
 
-        reloader = PresentationReloader(mock_ws, None, None, None)
+        reloader = PresentationReloader(mock_ws)
         reloader.tracking_path = self.tracking_path
 
         reloader.on_open()
-        self.assertTrue(reloader.observer.is_alive())
+        observer = reloader.observer
+        self.assertTrue(observer.is_alive())
 
         reloader.on_close(None)
 
         # Observer should be stopped and joined
         time.sleep(0.1)  # Give it time to stop
-        self.assertFalse(reloader.observer.is_alive())
+        self.assertFalse(observer.is_alive())
         self.assertIsNone(reloader.observer)
         self.assertIsNone(reloader.event_handler)
 
@@ -167,7 +168,7 @@ class WebSocketReloadTestCase(TestCase):
         """Test that reloader cleans up if observer start fails"""
         mock_ws = Mock()
 
-        reloader = PresentationReloader(mock_ws, None, None, None)
+        reloader = PresentationReloader(mock_ws)
         reloader.tracking_path = "/nonexistent/path"
 
         # Should handle error gracefully
@@ -181,7 +182,7 @@ class WebSocketReloadTestCase(TestCase):
         """Test that calling on_close twice doesn't crash"""
         mock_ws = Mock()
 
-        reloader = PresentationReloader(mock_ws, None, None, None)
+        reloader = PresentationReloader(mock_ws)
         reloader.tracking_path = self.tracking_path
 
         reloader.on_open()
@@ -202,7 +203,7 @@ class WebSocketReloadTestCase(TestCase):
         subdir = Path(self.tracking_path) / 'subdir'
         subdir.mkdir()
 
-        reloader = PresentationReloader(mock_ws, None, None, None)
+        reloader = PresentationReloader(mock_ws)
         reloader.tracking_path = self.tracking_path
 
         reloader.on_open()
@@ -218,7 +219,7 @@ class WebSocketReloadTestCase(TestCase):
         """Test that on_message handler is a no-op"""
         mock_ws = Mock()
 
-        reloader = PresentationReloader(mock_ws, None, None, None)
+        reloader = PresentationReloader(mock_ws)
 
         # Should not raise any exception
         try:
@@ -243,7 +244,7 @@ class WebSocketIntegrationTestCase(TestCase):
         mock_ws = Mock()
         mock_ws.closed = False
 
-        reloader = PresentationReloader(mock_ws, None, None, None)
+        reloader = PresentationReloader(mock_ws)
         reloader.tracking_path = self.tests_folder
 
         reloader.on_open()
@@ -273,7 +274,7 @@ class WebSocketIntegrationTestCase(TestCase):
         mock_ws = Mock()
         mock_ws.closed = False
 
-        reloader = PresentationReloader(mock_ws, None, None, None)
+        reloader = PresentationReloader(mock_ws)
         reloader.tracking_path = self.tests_folder
 
         reloader.on_open()
@@ -300,7 +301,7 @@ class WebSocketIntegrationTestCase(TestCase):
         mock_ws = Mock()
         mock_ws.closed = False
 
-        reloader = PresentationReloader(mock_ws, None, None, None)
+        reloader = PresentationReloader(mock_ws)
         reloader.tracking_path = self.tests_folder
 
         reloader.on_open()

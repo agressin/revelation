@@ -221,7 +221,7 @@ class CliErrorMessagesTestCase(TestCase):
             result = self.runner.invoke(cli, [
                 'start',
                 str(pres_dir),
-                '--style',
+                '--style-override-file',
                 str(style_file)
             ])
 

@@ -136,7 +136,7 @@ class CliTestCase(TestCase):
 
         self.assertEqual(result.exit_code, 1)
         self.assertEqual(
-            result.output, "Error: Presentation file not found.\n"
+            result.output, "Error: Presentation file / dir not found.\n"
         )
 
     def test_mkstatic_style_not_file(self):
@@ -191,9 +191,10 @@ class CliTestCase(TestCase):
         result = runner.invoke(cli.start, [presentation])
 
         self.assertEqual(result.exit_code, 1)
-        self.assertEqual(
-            result.output, "Error: Presentation file not found.\n"
+        self.assertIn(
+            f"✗ Error: Presentation not found: '{presentation}'", result.output
         )
+        self.assertIn("mkpresentation", result.output)
 
     def test_start_style_not_file(self):
         base_folder = tempfile.mkdtemp(dir=self.tests_folder)
@@ -206,10 +207,7 @@ class CliTestCase(TestCase):
         result = runner.invoke(cli.start, [presentation_file, "-s", style])
 
         self.assertEqual(result.exit_code, 1)
-        self.assertEqual(
-            result.output,
-            "Error: Style is not a css file or does not exists.\n",
-        )
+        self.assertIn(f"✗ Error: Style file not found: '{style}'", result.output)
 
     def test_start_style_not_css(self):
         base_folder = tempfile.mkdtemp(dir=self.tests_folder)
@@ -222,7 +220,7 @@ class CliTestCase(TestCase):
         result = runner.invoke(cli.start, [presentation_file, "-s", style])
 
         self.assertEqual(result.exit_code, 1)
-        self.assertEqual(
+        self.assertIn(
+            f"✗ Error: Style file must be a .css file, got: '{style}'",
             result.output,
-            "Error: Style is not a css file or does not exists.\n",
         )
