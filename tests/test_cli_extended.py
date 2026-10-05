@@ -251,3 +251,51 @@ class CliErrorMessagesTestCase(TestCase):
 
                     self.assertIn('already in use', result.output)
                     self.assertIn('4001', result.output)  # Suggests next port
+
+
+class CliStartServerTestCase(TestCase):
+    """Server wiring of the start command (no real server is started)"""
+
+    def setUp(self):
+        # Default runner: result.output includes stderr
+        self.runner = CliRunner()
+        self.tests_folder = tempfile.mkdtemp()
+        self.pres_dir = Path(self.tests_folder) / 'pres'
+        self.pres_dir.mkdir()
+        (self.pres_dir / 'slides.md').write_text('# Test')
+
+    def tearDown(self):
+        shutil.rmtree(self.tests_folder)
+
+    def _start(self, *args):
+        with patch('revelation.cli.os.path.exists', return_value=True), \
+                patch('revelation.cli.Resource') as mock_resource, \
+                patch('revelation.cli.WebSocketServer'):
+            result = self.runner.invoke(cli, ['start', str(self.pres_dir), *args])
+        routes = mock_resource.call_args[0][0]
+        return result, dict(routes)['^/.*']
+
+    def test_no_debugger_without_debug(self):
+        """Without --debug the app is not wrapped in the werkzeug debugger"""
+        from werkzeug.debug import DebuggedApplication
+        from revelation import Revelation
+        result, app = self._start()
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertIsInstance(app, Revelation)
+        self.assertNotIsInstance(app, DebuggedApplication)
+
+    def test_debugger_with_debug(self):
+        """With --debug the app is wrapped exactly once"""
+        from werkzeug.debug import DebuggedApplication
+        from revelation import Revelation
+        result, app = self._start('--debug')
+        self.assertIsInstance(app, DebuggedApplication)
+        self.assertIsInstance(app.app, Revelation)
+
+    def test_no_network_warning_on_localhost(self):
+        result, _ = self._start('-h', 'localhost')
+        self.assertNotIn('reachable from the network', result.output)
+
+    def test_network_warning_on_public_host(self):
+        result, _ = self._start('-h', '0.0.0.0')
+        self.assertIn('reachable from the network', result.output)

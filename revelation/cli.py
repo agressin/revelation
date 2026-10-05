@@ -25,6 +25,9 @@ REVEALJS_FOLDER = os.path.join(
     os.path.join(os.path.dirname(revelation.__file__), "static"), "revealjs"
 )
 
+# Hostnames that keep the server private to this machine
+LOCAL_HOSTNAMES = ("localhost", "127.0.0.1", "::1")
+
 # DRY form for echoing errors
 error_echo = partial(click.secho, err=True, fg="red", bold=True)
 
@@ -426,6 +429,7 @@ def start(ctx, presentation, port, config, media, theme, style, debug, hostname)
         ctx.exit(1)
 
     if debug:
+        # Interactive debugger: never expose it beyond localhost
         app = DebuggedApplication(app)
 
     PresentationReloader.tracking_path = os.path.abspath(path)
@@ -433,6 +437,20 @@ def start(ctx, presentation, port, config, media, theme, style, debug, hostname)
     server_url = f"http://{hostname}:{port}"
     click.echo(f"\n✓ Server starting at {server_url}")
     click.echo(f"  Press Ctrl+C to stop\n")
+
+    if hostname not in LOCAL_HOSTNAMES:
+        click.secho(
+            f"⚠️  Warning: listening on '{hostname}', the presentation (and its "
+            "folder) is reachable from the network.",
+            err=True, fg="yellow",
+        )
+        if debug:
+            click.secho(
+                "   --debug exposes an interactive debugger (code execution) "
+                "to the network!",
+                err=True, fg="red", bold=True,
+            )
+        click.secho("   Use -h localhost to keep it local.\n", err=True, fg="yellow")
 
     # Try to open browser, but don't fail if it doesn't work
     try:
@@ -447,7 +465,7 @@ def start(ctx, presentation, port, config, media, theme, style, debug, hostname)
             Resource(
                 [
                     ("^/reloader.*", PresentationReloader),
-                    ("^/.*", DebuggedApplication(app)),
+                    ("^/.*", app),
                 ]
             ),
         ).serve_forever()
