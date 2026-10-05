@@ -288,7 +288,8 @@ section.has-dark-background h6 {
 }
 .reveal table th[align=center], .reveal table td[align=center] { text-align: center; }
 .reveal table th[align=right],  .reveal table td[align=right]  { text-align: right; }
-.reveal table tbody tr:last-child th, .reveal table tbody tr:last-child td { border-bottom: none; }
+/* Trait de fermeture en bas du tableau, assorti à celui de l'en-tête */
+.reveal table tbody tr:last-child th, .reveal table tbody tr:last-child td { border-bottom: 2px solid var(--heig-teal); }
 
 /* Variante zébrée */
 .reveal .tab-zebre table th, .reveal table.tab-zebre th {
@@ -297,6 +298,9 @@ section.has-dark-background h6 {
   border-bottom: none;
 }
 .reveal .tab-zebre table td, .reveal table.tab-zebre td { border-bottom: none; }
+.reveal .tab-zebre table tbody tr:last-child td, .reveal table.tab-zebre tbody tr:last-child td {
+  border-bottom: 2px solid var(--heig-teal);
+}
 .reveal .tab-zebre table tbody tr:nth-child(even), .reveal table.tab-zebre tbody tr:nth-child(even) {
   background: var(--heig-gris-clair);
 }
@@ -311,6 +315,7 @@ section.has-dark-background h6 {
 .reveal table.tab-grille tbody tr:last-child td {
   border: 2px solid #c9c8c4;
 }
+.reveal .tab-grille table, .reveal table.tab-grille { border: 2px solid #c9c8c4; }
 .reveal .tab-grille table th, .reveal table.tab-grille th { background: var(--heig-gris-clair); }
 
 /* Modificateur compact */
