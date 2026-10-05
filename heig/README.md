@@ -8,7 +8,7 @@ qui reconstruit l'environnement complet, **hors ligne** ensuite.
 |---|---|
 | `theme/` | `heig_ec+g.css` (thème des cours, `REVEAL_THEME = "heig_ec+g"`) |
 | `images/` | logos utilisés par les templates (`logo-heig-vd.svg`, `logo-{gte,ggt,master,igso,sgpf,…}`, `coin_BG.png`), badges `cc/<licence>.png` |
-| `plugin/` | plugins absents de reveal.js : `timetimer` (minuteur, voir plus bas), `title-footer` (pied de page avec le titre, chargé par `myPresentation.html`), `toc-progress` (table des matières en pied de page ; conservé mais **non chargé** par `myPresentation.html` : son bandeau déborde et chevauche le menu, le badge CC et les flèches de navigation une fois combiné au thème `heig_ec+g`, cf. historique git), `chalkboard` (2.3.3, reveal.js-plugins 4.6.0, Asvin Goel, MIT : tableau blanc et annotations, chargé par `myPresentation.html`, sans bouton à l'écran ; menu onglet « Outils », touches C annoter, B tableau, Suppr effacer) |
+| `plugin/` | plugins absents de reveal.js : `timetimer` (minuteur, voir plus bas), `sections` (repères de section, voir plus bas), `title-footer` (pied de page avec le titre, chargé par `myPresentation.html`), `toc-progress` (table des matières en pied de page ; conservé mais **non chargé** par `myPresentation.html` : son bandeau déborde et chevauche le menu, le badge CC et les flèches de navigation une fois combiné au thème `heig_ec+g`, cf. historique git), `chalkboard` (2.3.3, reveal.js-plugins 4.6.0, Asvin Goel, MIT : tableau blanc et annotations, chargé par `myPresentation.html`, sans bouton à l'écran ; menu onglet « Outils », touches C annoter, B tableau, Suppr effacer) |
 | `plugin/leaflet/`, `plugin/chartjs/`, `plugin/chartjs-plugin-datalabels/`, `plugin/chartjs-adapter-date-fns/` | Leaflet 1.9.4, Chart.js 4.5.1 (+ plugins datalabels 2.2.0 et adaptateur de dates date-fns 3.0.0, build `.bundle` qui inclut date-fns), versions figées vendues en local pour les templates `presentation_{lidar,sgpf,veille}.html` (cartes et graphiques). Les tuiles de carte et le WMS `geo.admin.ch`/`rar-indg.heig-vd.ch` restent en ligne (intrinsèque), regroupés dans une variable `RESSOURCES_EN_LIGNE` en tête de script de chaque template. |
 
 ## Installation : `heig/bootstrap.sh`
@@ -69,6 +69,25 @@ fois. À l'impression, le panneau est masqué et le bouton reste comme repère.
 
 Fermer la balise (`</timetimer>`) : une balise non fermée fonctionne (le
 contenu qui suit est conservé), mais c'est un rattrapage.
+
+## Repères de section : plugin `sections`
+
+Une section = un bloc entre deux `---` (slide horizontale et sa pile).
+
+- **Pied de page** : « titre du cours · section en cours » (la slide de
+  titre garde le pied de page d'origine).
+- **Barre de progression** : la barre de reveal.js est découpée en un
+  segment par section, avec une graduation à chaque frontière ; au survol le
+  segment s'épaissit et affiche le nom de la section ; un clic y amène.
+
+Nom d'une section : l'attribut `data-section` s'il est posé sur une de ses
+slides, sinon son premier titre (h1 à h3). Pour un nom court :
+
+```markdown
+---
+
+<!-- .slide: data-section="DBSCAN" -->
+```
 
 ## Lancement
 

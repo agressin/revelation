@@ -1,0 +1,56 @@
+/* Repères de section (plugin HEIG-VD), voir sections.js */
+
+/* Barre segmentée posée exactement sur la barre de progression de reveal.js
+   (bas de l'écran, 3 px). La zone sensible au survol est plus haute que le
+   trait visible, pour être attrapable à la souris. */
+.reveal .heig-sections {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 14px;
+  z-index: 31;
+  pointer-events: none;
+}
+.reveal .heig-section {
+  position: absolute;
+  bottom: 0;
+  height: 14px;
+  pointer-events: auto;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+/* trait visible de la section : 3 px, comme la barre d'origine */
+.reveal .heig-section::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  border-left: 2px solid #fff;          /* graduation à chaque frontière */
+  transition: height 0.12s ease, background 0.12s ease;
+}
+.reveal .heig-section.courante::before { background: rgba(218, 41, 28, 0.25); }
+.reveal .heig-section:hover::before { height: 9px; background: rgba(0, 128, 128, 0.55); }
+
+/* nom de la section au survol */
+.reveal .heig-section-nom {
+  display: none;
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  padding: 3px 8px;
+  font-size: 14px;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: #fff;
+  background: #008080;
+  border-radius: 4px;
+  pointer-events: none;
+}
+.reveal .heig-section:hover .heig-section-nom { display: block; }
+/* sections de la moitié droite : étiquette alignée à droite */
+.reveal .heig-section.droite .heig-section-nom { left: auto; right: 0; }
+
+@media print { .reveal .heig-sections { display: none !important; } }
