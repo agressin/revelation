@@ -299,3 +299,14 @@ class CliStartServerTestCase(TestCase):
     def test_network_warning_on_public_host(self):
         result, _ = self._start('-h', '0.0.0.0')
         self.assertIn('reachable from the network', result.output)
+
+    def test_browser_opened_by_default(self):
+        with patch('revelation.cli.webbrowser.open') as mock_open:
+            self._start('-p', '5123')
+        mock_open.assert_called_once_with('http://localhost:5123', new=2)
+
+    def test_no_browser_option(self):
+        with patch('revelation.cli.webbrowser.open') as mock_open:
+            result, _ = self._start('--no-browser')
+        self.assertEqual(result.exit_code, 0, result.output)
+        mock_open.assert_not_called()

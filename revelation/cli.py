@@ -328,8 +328,16 @@ def convertconfig(ctx, python_config, output, force):
     help="Run the revelation server on debug mode",
 )
 @click.option("--hostname", "-h", default="localhost", help="Presentation server hostname")
+@click.option(
+    "--no-browser",
+    "no_browser",
+    is_flag=True,
+    default=False,
+    help="Do not open the presentation in a web browser",
+)
 @click.pass_context
-def start(ctx, presentation, port, config, media, theme, style, debug, hostname):
+def start(ctx, presentation, port, config, media, theme, style, debug, hostname,
+          no_browser):
     """Start revelation presentation command"""
     # Check if reveal.js is installed: no silent download at start
     if not os.path.exists(os.path.join(REVEALJS_FOLDER, "reveal.js")):
@@ -453,11 +461,12 @@ def start(ctx, presentation, port, config, media, theme, style, debug, hostname)
         click.secho("   Use -h localhost to keep it local.\n", err=True, fg="yellow")
 
     # Try to open browser, but don't fail if it doesn't work
-    try:
-        webbrowser.open(server_url, new=2)
-    except Exception as e:
-        click.echo(f"⚠️  Could not open browser automatically: {e}")
-        click.echo(f"   Please open {server_url} manually\n")
+    if not no_browser:
+        try:
+            webbrowser.open(server_url, new=2)
+        except Exception as e:
+            click.echo(f"⚠️  Could not open browser automatically: {e}")
+            click.echo(f"   Please open {server_url} manually\n")
 
     try:
         WebSocketServer(
