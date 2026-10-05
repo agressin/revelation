@@ -280,7 +280,7 @@ section.has-dark-background h6 {
 .reveal table th, .reveal table td {
   text-align: left;
   padding: 0.25em 0.6em;
-  border-bottom: 1px solid var(--heig-gris-trait);
+  border-bottom: 1.5px solid var(--heig-gris-trait);
 }
 .reveal table th {
   font-weight: 600;
@@ -301,10 +301,15 @@ section.has-dark-background h6 {
   background: var(--heig-gris-clair);
 }
 
-/* Variante grille */
+/* Variante grille. 2 px : la slide est réduite par reveal.js (souvent
+   ×0.8), un trait de 1 px tombe sous le pixel et certaines lignes
+   disparaissent à l'écran comme dans le PDF. La dernière ligne garde sa
+   bordure basse (la règle par défaut la retire). */
 .reveal .tab-grille table th, .reveal .tab-grille table td,
-.reveal table.tab-grille th, .reveal table.tab-grille td {
-  border: 1px solid #c9c8c4;
+.reveal table.tab-grille th, .reveal table.tab-grille td,
+.reveal .tab-grille table tbody tr:last-child td,
+.reveal table.tab-grille tbody tr:last-child td {
+  border: 2px solid #c9c8c4;
 }
 .reveal .tab-grille table th, .reveal table.tab-grille th { background: var(--heig-gris-clair); }
 
@@ -342,6 +347,19 @@ section.has-dark-background h6 {
 /*********************************************
  * IMPRESSION
  *********************************************/
+
+/* Code en mode impression (?print-pdf) : fond clair et coloration lisible
+   sur papier, à la place du thème sombre (zenburn) de la projection.
+   Classes posées par reveal.js en mode impression : reveal-print (5.x),
+   print-pdf (4.x). */
+:is(html.reveal-print, html.print-pdf) .reveal pre { box-shadow: none; border: 1.5px solid var(--heig-gris-trait); }
+:is(html.reveal-print, html.print-pdf) .reveal pre code,
+:is(html.reveal-print, html.print-pdf) .reveal pre code.hljs { background: #f7f7f5; color: #24292e; }
+:is(html.reveal-print, html.print-pdf) .reveal pre code :is(.hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-meta) { color: #c0392b; font-weight: normal; }
+:is(html.reveal-print, html.print-pdf) .reveal pre code :is(.hljs-string, .hljs-regexp, .hljs-symbol) { color: #1a7f37; }
+:is(html.reveal-print, html.print-pdf) .reveal pre code :is(.hljs-number, .hljs-built_in, .hljs-builtin-name, .hljs-type) { color: #0550ae; }
+:is(html.reveal-print, html.print-pdf) .reveal pre code :is(.hljs-title, .hljs-function, .hljs-class, .hljs-params, .hljs-attr, .hljs-attribute, .hljs-variable) { color: #6f42c1; }
+:is(html.reveal-print, html.print-pdf) .reveal pre code :is(.hljs-comment, .hljs-quote, .hljs-doctag) { color: #6a737d; font-style: italic; }
 @media print {
   .backgrounds { background-color: var(--r-background-color); }
 
