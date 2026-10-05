@@ -275,7 +275,7 @@ Examples:
   # Overwrite existing file
   python -m revelation.convert_config config.py --force
 
-For more information, see MIGRATION_GUIDE.md
+For more information, see README.md
         """
     )
 

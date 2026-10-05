@@ -8,64 +8,39 @@ Revelation is a CLI tool that makes reveal.js presentations easy by using markdo
 
 ## Development Commands
 
+Everything goes through `uv` (see `pyproject.toml` + `uv.lock`); there is no
+`pip install -e .` workflow and no PyPI publishing step in this fork.
+
 ### Installation & Setup
 ```bash
-# Install development dependencies
-make install.hack
-
-# Install reveal.js (required before running presentations)
-revelation installreveal
+# Fetch reveal.js 5.2.1 + reveal.js-menu + MathJax + HEIG files (see heig/README.md)
+heig/bootstrap.sh      # or: make bootstrap
 ```
 
 ### Testing
 ```bash
-# Run all tests
+# Run all tests (pytest, not nose)
 make test
+# equivalent to: BROWSER=true uv run --group dev pytest
 
-# Run tests with coverage
-make cover
-
-# Run specific test file
-nosetests tests/test_app.py
+# Run a specific test file
+uv run --group dev pytest tests/test_app.py
 ```
 
-### Linting & Formatting
-```bash
-# Lint code with flake8
-make lint
-
-# Format code with black and isort
-make format
-```
-
-### Building & Publishing
-```bash
-# Build package for distribution
-make build
-
-# Publish to PyPI (requires twine)
-make publish
-
-# Clean build artifacts
-make clean
-```
+There is no `make lint`/`make format`/`make build`/`make publish`/`make clean`
+target in this fork's `makefile` (only `bootstrap`, `lock`, `test`, `start`).
 
 ### Running Presentations
 ```bash
-# Start presentation server (default port 4000)
-revelation start PRESENTATION_PATH
-
-# Start with custom port and hostname
-revelation start PRESENTATION_PATH --port 5000 --hostname 0.0.0.0
-
-# Start with debug mode
-revelation start PRESENTATION_PATH --debug
+# Start presentation server (default port 4000), using the launch command
+# documented in README.md / heig/README.md
+uv run --no-project --with-requirements requirements.txt revelation.py start -h localhost PRESENTATION_PATH
 
 # Create new presentation boilerplate
-revelation mkpresentation my_presentation
+uv run --no-project --with-requirements requirements.txt revelation.py mkpresentation my_presentation
 
 # Export to static HTML
-revelation mkstatic PRESENTATION_PATH --output-folder output
+uv run --no-project --with-requirements requirements.txt revelation.py mkstatic PRESENTATION_PATH --output-folder output
 ```
 
 ## Architecture
@@ -114,10 +89,9 @@ revelation mkstatic PRESENTATION_PATH --output-folder output
 
 ```
 presentation_name/
-├── slides.md          # Main markdown file (or multiple *.md files)
-├── config.py          # Optional: Override default config
-├── media/             # Optional: Images and media files
-└── theme/             # Optional: Custom CSS themes
+├── slides.md        # Main markdown file (or multiple *.md files)
+├── config.toml      # Optional: Override default config (recommended format)
+└── media/           # Optional: Images and media files
 ```
 
 ### Configuration System
@@ -126,14 +100,14 @@ Configuration supports two formats:
 - **TOML** (recommended, secure): `config.toml`
 - **Python** (deprecated, security risk): `config.py`
 
-**Security Note**: Python config files use `exec()` and are deprecated. Use TOML format for new presentations. See `MIGRATION_GUIDE.md` for migration instructions.
+**Security Note**: Python config files use `exec()` (sandboxed, restricted builtins) and are deprecated. Use TOML format for new presentations; `revelation convertconfig config.py` migrates an existing one (see README.md).
 
 Configuration options (both formats):
 - `reveal_meta`: Title, author, description metadata (TOML table / Python dict)
 - `reveal_theme`: Theme name (beige, black, blood, league, moon, night, etc.) or custom theme path
 - `reveal_theme_logo`: Custom logo selection (e.g., "master", "ggt")
 - `reveal_licence`: Creative Commons license (e.g., "by-sa", "by-nc-nd")
-- `reveal_template`: Template file to use (e.g., "presentation.html", "myPresentation.html")
+- `reveal_template`: Template file to use (`myPresentation.html` by default, or a specialized template from `revelation/templates/`)
 - `reveal_slide_separator`: Horizontal slide separator (default: `---`)
 - `reveal_vertical_slide_separator`: Vertical slide separator (default: `--`)
 - `reveal_config`: Reveal.js configuration (controls, progress, transitions, etc.)
@@ -156,7 +130,6 @@ Templates in `revelation/templates/` use Jinja2 and receive:
 
 ## Testing Notes
 
-- Tests use `nose` test runner
+- Tests use `pytest` (via `uv run --group dev pytest`), not `nose`
 - Mock library used for simulating external dependencies
-- Coverage target tracked via coveralls
-- All test files in `tests/` directory follow `test_*.py` naming
+- All test files in `tests/` directory follow `test_*.py` naming (`testpaths = ["tests"]` in `pyproject.toml`, so `scripts/test_conversion.py` is not picked up)
