@@ -8,7 +8,7 @@ qui reconstruit l'environnement complet, **hors ligne** ensuite.
 |---|---|
 | `theme/` | `heig_ec+g.css` (thème des cours, `REVEAL_THEME = "heig_ec+g"`), `heig_ec+g-print.css`, `heig_ec+g_old.css` |
 | `images/` | logos utilisés par les templates (`logo-heig-vd.svg`, `logo-{gte,ggt,master,igso,sgpf,…}`, `coin_BG.png`), badges `cc/<licence>.png` |
-| `plugin/` | plugins absents de reveal.js : `timetimer` (minuteur, voir plus bas), `title-footer`, `toc-progress` (chargés par `myPresentation.html`), `chalkboard` (reveal.js-plugins, Asvin Goel, MIT, utilisé par `presentation_sgpf.html`) |
+| `plugin/` | plugins absents de reveal.js : `timetimer` (minuteur, voir plus bas), `title-footer`, `toc-progress` (chargés par `myPresentation.html`), `chalkboard` (reveal.js-plugins 2.1.0, Asvin Goel, MIT : tableau blanc et annotations, chargé par `myPresentation.html` ; touches C annoter, B tableau, Suppr effacer) |
 
 ## Installation : `heig/bootstrap.sh`
 

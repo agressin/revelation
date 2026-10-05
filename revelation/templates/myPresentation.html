@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/title-footer/title-footer.css">
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/toc-progress/toc-progress.css">
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/timetimer/timetimer.css">
+    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/chalkboard/style.css">
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/highlight/zenburn.css">
 
     {% if theme %}
@@ -67,6 +68,7 @@
     <script src="{{ static_revealjs }}/plugin/notes/notes.js"></script>
     <script src="{{ static_revealjs }}/plugin/menu/menu.js"></script>
     <script src="{{ static_revealjs }}/plugin/timetimer/timetimer.js"></script>
+    <script src="{{ static_revealjs }}/plugin/chalkboard/plugin.js"></script>
 
     <script>
       
@@ -79,6 +81,13 @@
         mathjax2: {
           mathjax: '{{ static_revealjs }}/plugin/mathjax/MathJax.js',
           config: 'TeX-AMS_HTML-full',
+        },
+        // Tableau / annotations (touches : C annoter la slide, B tableau,
+        // Suppr effacer). Thème blanc, assorti aux slides HEIG.
+        chalkboard: {
+          theme: 'whiteboard',
+          toggleChalkboardButton: { left: '120px', bottom: '20px' },
+          toggleNotesButton: { left: '165px', bottom: '20px' },
         },
         // ⚙️ Configuration du menu (tout est optionnel)
         menu: {
@@ -111,6 +120,7 @@
           RevealMath,
           RevealMenu,
           RevealTimeTimer,
+          RevealChalkboard,
         ],
       });
 
