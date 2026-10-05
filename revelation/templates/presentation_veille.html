@@ -1,115 +1,214 @@
 <!doctype html>
-<html>
+<html lang="fr">
   <head>
-    <!-- Metadata about the presentation -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
     <title>{{ meta.title }}</title>
-
     <meta name="description" content="{{ meta.description }}">
     <meta name="author" content="{{ meta.author }}">
 
-    <!-- Presentation Styles -->
+    <!-- Styles reveal 5.x -->
     <link rel="stylesheet" href="{{ static_revealjs }}/reset.css">
     <link rel="stylesheet" href="{{ static_revealjs }}/reveal.css">
-    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/toc-progress/toc-progress.css">
 
-    <!-- leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <!-- Plugins tiers (css) -->
+    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/title-footer/title-footer.css">
+    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/timetimer/timetimer.css">
+    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/chalkboard/style.css">
     <style>
-    .leaflet-control  { display:none;}
+      .slide-menu .heig-outils { list-style: none; margin: 0; padding: 0; }
+      .slide-menu .heig-outils a { display: block; padding: 12px 20px; color: inherit; text-decoration: none; }
+      .slide-menu .heig-outils a:hover { background: rgba(0, 0, 0, 0.08); }
+      .slide-menu .heig-outils i { width: 1.4em; }
+      .slide-menu .heig-outils kbd { float: right; font-size: 0.8em; opacity: 0.7; }
+      .slide-menu .heig-outils-aide { padding: 4px 20px; font-size: 0.85em; opacity: 0.7; }
+    </style>
+    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/highlight/zenburn.css">
+
+    <!-- Spécifique à cette présentation : carte Leaflet (servie en local,
+         cf. heig/plugin/leaflet/), les boutons de contrôle sont masqués. -->
+    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/leaflet/leaflet.css">
+    <style>
+      .leaflet-control { display: none; }
     </style>
 
     {% if theme %}
       <link rel="stylesheet" href="{{ theme }}" id="theme">
+    {% else %}
+      <link rel="stylesheet" href="{{ static_revealjs }}/theme/white.css" id="theme">
     {% endif %}
 
     {% if style %}
       <link rel="stylesheet" href="{{ style }}" id="style">
     {% endif %}
-
-    <!-- Theme used for syntax highlighted code -->
-    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/highlight/monokai.css" id="highlight-theme">
-
   </head>
-
   <body>
-    <!-- Presentation body -->
+
     <div class="reveal">
       <img class="logo" src="{{ static_revealjs }}/images/logo-heig-vd.svg" alt="">
-	  <img class="logo-right" src="{{ static_revealjs }}/images/logo-{{ logo }}.png" alt="{{ logo }}">
-      <!-- Any section element inside of this container is displayed as a slide -->
+      <img class="logo-right" src="{{ static_revealjs }}/images/logo-{{ logo }}.png" alt="{{ logo }}">
       <div class="slides">
         {% for section in slides %}
           {% if section|length > 1 %}
             <section>
               {% for slide in section %}
                 <section data-markdown>
-                  <textarea data-template>
+                  <script type="text/template">
                     {{ slide|safe }}
-                  </textarea>
+                  </script>
                 </section>
               {% endfor %}
             </section>
           {% else %}
             {% for slide in section %}
               <section data-markdown>
-                <textarea data-template>
+                <script type="text/template">
                   {{ slide|safe }}
-                </textarea>
+                </script>
               </section>
             {% endfor %}
           {% endif %}
         {% endfor %}
       </div>
-
     </div>
-    {% if licence %}
-      <a rel="license" href="http://creativecommons.org/licenses/{{ licence }}/4.0/">
-          <img alt="Creative Commons License" style="border-width:0;position:absolute;bottom:5px;right:150px;" src="https://i.creativecommons.org/l/{{ licence }}/4.0/88x31.png" />
-      </a>
-    {% endif %}
 
+    <a rel="license" href="http://creativecommons.org/licenses/{{ licence }}/4.0/"><img alt="Creative Commons License" style="border-width:0;position:absolute;bottom:5px;right:150px;position:fixed;" src="{{ static_revealjs }}/images/cc/{{ licence }}.png" /></a>
 
-    <!-- Reveal.js script -->
+    <!-- Tout est servi en local (heig/bootstrap.sh) : aucune dépendance au
+         réseau en salle ni pour l'impression PDF, sauf les tuiles de la
+         carte (cf. RESSOURCES_EN_LIGNE ci-dessous). -->
     <script src="{{ static_revealjs }}/reveal.js"></script>
-
-    <!-- Reveal.js plugins -->
+    <script src="{{ static_revealjs }}/plugin/math/math.js"></script>
     <script src="{{ static_revealjs }}/plugin/markdown/markdown.js"></script>
     <script src="{{ static_revealjs }}/plugin/highlight/highlight.js"></script>
     <script src="{{ static_revealjs }}/plugin/notes/notes.js"></script>
-    <script src="{{ static_revealjs }}/plugin/math/math.js"></script>
+    <script src="{{ static_revealjs }}/plugin/zoom/zoom.js"></script>
+    <script src="{{ static_revealjs }}/plugin/search/search.js"></script>
+    <script src="{{ static_revealjs }}/plugin/menu/menu.js"></script>
+    <script src="{{ static_revealjs }}/plugin/timetimer/timetimer.js"></script>
+    <script src="{{ static_revealjs }}/plugin/chalkboard/plugin.js"></script>
+    <script src="{{ static_revealjs }}/plugin/title-footer/title-footer.js"></script>
 
-    <!-- leaflet -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- chartjs -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Spécifique à cette présentation : carte (Leaflet 1.9.4) et graphiques
+         (Chart.js 4.5.1), vendus en local, cf. heig/plugin/. -->
+    <script src="{{ static_revealjs }}/plugin/leaflet/leaflet.js"></script>
+    <script src="{{ static_revealjs }}/plugin/chartjs/chart.umd.min.js"></script>
+
     <script>
-
-      Reveal.initialize({
+      // Options de ce template. La config du cours (REVEAL_CONFIG) est
+      // fusionnée par-dessus et a le dernier mot (largeur/hauteur,
+      // transitions, etc.) : plus d'appel Reveal.configure() séparé après
+      // coup, tout part dans Reveal.initialize().
+      var revealOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        // MathJax 2 servi en local (plugin RevealMath = MathJax 2 par défaut)
+        mathjax2: {
+          mathjax: '{{ static_revealjs }}/plugin/mathjax/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+        },
+        // Tableau / annotations (chalkboard 2.3.3, sans boutons à l'écran) :
+        // C annoter la slide, B tableau, Suppr effacer ; aussi dans le menu,
+        // onglet « Outils ». Clic gauche dessine, clic droit gomme.
+        chalkboard: {
+          theme: 'whiteboard',
+        },
+        // Configuration du menu (tout est optionnel)
+        menu: {
+          side: 'left',
+          width: 'normal',
+          numbers: false,
+          titleSelector: 'h1, h2, h3, h4, h5, h6',
+          hideMissingTitles: false,
+          markers: true,
+          themes: false,          // ou true / liste custom
+          transitions: false,     // ou ['None','Fade','Slide']
+          openButton: true,
+          openSlideNumber: false,
+          keyboard: true,
+          sticky: false,
+          autoOpen: true,
+          custom: [
+            {
+              title: 'Outils',
+              icon: '<i class="fas fa-pen"></i>',
+              content:
+                '<ul class="heig-outils">' +
+                '<li><a href="#" onclick="return heigOutil(\'notes\')"><i class="fas fa-pen"></i> Annoter la slide <kbd>C</kbd></a></li>' +
+                '<li><a href="#" onclick="return heigOutil(\'tableau\')"><i class="fas fa-chalkboard"></i> Tableau blanc <kbd>B</kbd></a></li>' +
+                '<li><a href="#" onclick="return heigOutil(\'effacer\')"><i class="fas fa-eraser"></i> Effacer la slide <kbd>Suppr</kbd></a></li>' +
+                '<li><a href="#" onclick="return heigOutil(\'tout\')"><i class="fas fa-trash"></i> Tout effacer</a></li>' +
+                '</ul>' +
+                '<p class="heig-outils-aide">Clic gauche : dessiner. Clic droit : gommer.</p>'
+            }
+          ]
+        },
+        //
         plugins: [
           RevealMarkdown,
           RevealHighlight,
+          RevealNotes,
           RevealMath,
+          RevealZoom,
+          RevealSearch,
+          RevealMenu,
+          RevealTimeTimer,
+          RevealChalkboard,
         ],
-		dependencies:
-		[ ]
+      };
+
+      // La config du cours (REVEAL_CONFIG) prime sur les options ci-dessus.
+      Reveal.initialize(Object.assign({}, revealOptions, {{ config|tojson }}));
+
+      // Pied de page avec le titre (title-footer.js est un script simple,
+      // pas un plugin reveal.js : on l'initialise une fois Reveal prêt).
+      Reveal.on('ready', function () {
+        title_footer.initialize();
       });
 
-      Reveal.configure({{ config|tojson }});
+      // Actions du menu « Outils » : fermer le menu, puis agir.
+      function heigOutil(action) {
+        var menu = Reveal.getPlugin('menu');
+        if (menu && menu.closeMenu) menu.closeMenu();
+        setTimeout(function () {
+          if (action === 'notes') RevealChalkboard.toggleNotesCanvas();
+          else if (action === 'tableau') RevealChalkboard.toggleChalkboard();
+          else if (action === 'effacer') RevealChalkboard.clear();
+          else if (action === 'tout') RevealChalkboard.resetAll();
+        }, 150);
+        return false;
+      }
 
-      <!-- leaflet -->
+      // Spécifique à cette présentation : carte Leaflet (Fribourg) et quatre
+      // graphiques Chart.js, construits à la demande (les graphiques le sont
+      // plus bas, protégés par un test d'existence de leur canvas : absents
+      // des présentations qui ne sont pas celle-ci, ex. dossier de test).
+      //
+      // Ressources intrinsèquement en ligne (tuiles du serveur HEIG) : seule
+      // partie de ce template qui dépend du réseau, contrairement au reste
+      // (servi en local, cf. heig/bootstrap.sh).
+      var RESSOURCES_EN_LIGNE = {
+        ortho2022Fribourg: 'https://rar-indg.heig-vd.ch/map/Fribourg/Ortho_Frib_2022_fme/{z}/{x}/{y}.png',
+        predFribourg: 'https://rar-indg.heig-vd.ch/map/Fribourg/ortho_fribourg_10cm_geo_all_slide50_color/{z}/{x}/{y}.png',
+        legendeFribourg: 'https://rar-indg.heig-vd.ch/map/legend_round.png',
+      };
+
       let map_fribourg = null;
-      let lyr_ortho2022 = L.tileLayer('https://rar-indg.heig-vd.ch/map/Fribourg/Ortho_Frib_2022_fme/{z}/{x}/{y}.png',
+      let lyr_ortho2022 = L.tileLayer(RESSOURCES_EN_LIGNE.ortho2022Fribourg,
                     {tms: 1, opacity: 1.0, attribution: "", minZoom: 13, maxZoom: 20});
       let lyr_pred = null;
+
+      // Graphiques Chart.js, créés plus bas si leur canvas existe. Restent
+      // à null sinon : les branches ci-dessous deviennent alors des no-op.
+      let doughnut = null, chart_bar = null, chart_bar_1 = null, scatter_chart = null;
 
       Reveal.on( 'slidechanged', event => {
       // event.previousSlide, event.currentSlide, event.indexh, event.indexv
         console.log("slidechanged", event );
-        //Map Fribourg slide 0/1 :
-        if ((event.indexh === 0) && (event.indexv === 1)){
+        //Map Fribourg slide 0/1 : le conteneur n'existe que sur la slide
+        //dédiée, absent ailleurs (ex. dossier de test générique).
+        if ((event.indexh === 0) && (event.indexv === 1) && document.getElementById('map_fribourg')){
           Reveal.navigateFragment(-1);
           if ( map_fribourg == null ){
             map_fribourg = L.map('map_fribourg');
@@ -117,7 +216,7 @@
             let logo = L.control({position: 'bottomright'});
             logo.onAdd = function(map_fribourg){
                 let div = L.DomUtil.create('div', 'legend');
-                div.innerHTML= "<img src='https://rar-indg.heig-vd.ch/map/legend_round.png' height='400px' />";
+                div.innerHTML= "<img src='" + RESSOURCES_EN_LIGNE.legendeFribourg + "' height='400px' />";
                 return div;
             }
             logo.addTo(map_fribourg);
@@ -125,7 +224,7 @@
           map_fribourg.setView([46.80634, 7.1617], 15);
         }
         //jeu de données Flair slide 3/1 :
-        if ((event.indexh === 3) && (event.indexv === 1)){
+        if ((event.indexh === 3) && (event.indexv === 1) && doughnut){
           doughnut.destroy()
           doughnut = new Chart(ctx_doughnut, {
             type: 'doughnut', //bar
@@ -133,7 +232,7 @@
             options: options_doughnut
           });
         }
-        if ((event.indexh === 3) && (event.indexv === 2)){
+        if ((event.indexh === 3) && (event.indexv === 2) && scatter_chart){
           Reveal.navigateFragment(-1);
           if (scatter_chart.data.datasets.length >= 6) {
             scatter_chart.data.datasets.splice(6, 6);
@@ -147,7 +246,7 @@
               options: options
           });
         }
-        if ((event.indexh === 3) && (event.indexv === 3)){
+        if ((event.indexh === 3) && (event.indexv === 3) && chart_bar){
           Reveal.navigateFragment(-1);
           if (chart_bar.data.labels.length >= 12) {
             chart_bar.data.labels.splice(12, 1);
@@ -166,7 +265,7 @@
             options: options_bar
           });
         }
-        if ((event.indexh === 3) && (event.indexv === 4)){
+        if ((event.indexh === 3) && (event.indexv === 4) && chart_bar_1){
          if (chart_bar_1.data.labels.length >= 7) {
             chart_bar_1.data.labels.splice(7, 1);
             chart_bar_1.data.datasets[0].data.splice(7, 1);
@@ -188,7 +287,7 @@
         //Map Fribourg slide 1/1 :
         if (event.fragment.getAttribute("id") === "fr-1"){
           if (map_fribourg !== null && lyr_pred == null) {
-            lyr_pred = L.tileLayer('https://rar-indg.heig-vd.ch/map/Fribourg/ortho_fribourg_10cm_geo_all_slide50_color/{z}/{x}/{y}.png',
+            lyr_pred = L.tileLayer(RESSOURCES_EN_LIGNE.predFribourg,
               {tms: 1, opacity: 0.5, attribution: "", minZoom: 13, maxZoom: 20});
             lyr_pred.setOpacity(0.5).addTo(map_fribourg);
             map_fribourg.flyTo([46.79723, 7.15346], 18, {animate: true, duration: 5});
@@ -198,13 +297,13 @@
         if (event.fragment.getAttribute("id")=== "fr-2"){
           map_fribourg.flyTo([46.79925, 7.15171], 20, {animate: true, duration: 3});
         }
-        if (event.fragment.getAttribute("id")=== "res-heig") {
+        if (event.fragment.getAttribute("id")=== "res-heig" && chart_bar) {
           // Add the new dataset to the existing chart
           chart_bar.data.datasets.push(dataset_heig);
           // Update the chart
           chart_bar.update();
         }
-        if (event.fragment.getAttribute("id")=== "res-heig-a") {
+        if (event.fragment.getAttribute("id")=== "res-heig-a" && chart_bar) {
           // Add the new dataset to the existing chart
           if (chart_bar.data.labels.length <= 12) {
             // Add the new dataset to the existing chart
@@ -215,14 +314,14 @@
             chart_bar.update();
           }
         }
-        if (event.fragment.getAttribute("id")=== "res-heig-1") {
+        if (event.fragment.getAttribute("id")=== "res-heig-1" && scatter_chart) {
           // Add the new dataset to the existing chart
 
           scatter_chart.data.datasets = scatter_chart.data.datasets.concat(datasetsVIT);
           // Update the chart
           scatter_chart.update();
         }
-        if (event.fragment.getAttribute("id")=== "res-heig-2") {
+        if (event.fragment.getAttribute("id")=== "res-heig-2" && chart_bar_1) {
           if (chart_bar_1.data.labels.length <= 7) {
             // Add the new dataset to the existing chart
             chart_bar_1.data.labels.push('𝐦𝐞𝐚𝐧 𝐈𝐨𝐔');
@@ -236,8 +335,10 @@
       } );
     </script>
 
-  <script>
-<!-- charjs-->
+    <!-- Spécifique à cette présentation : construction des 4 graphiques
+         Chart.js, protégée par un test d'existence du premier canvas. -->
+    <script>
+      if (document.getElementById('doughnut_chart')) {
       const ctx_doughnut = document.getElementById('doughnut_chart');
       const ctx_bar = document.getElementById('bar_chart');
       const ctx_bar_1 = document.getElementById('bar_chart_1');
@@ -267,7 +368,7 @@
             hoverOffset: 4
           }]
         };
-      let doughnut = new Chart(ctx_doughnut, {
+      doughnut = new Chart(ctx_doughnut, {
             type: 'doughnut', //bar
             data: data_doughnut,
             options: options_doughnut
@@ -336,7 +437,7 @@
           labels: labels.slice(0, -1),
           datasets: [dataset_ign] //dataset_best
         };
-      let chart_bar = new Chart(ctx_bar, {
+      chart_bar = new Chart(ctx_bar, {
             type: 'bar',
             data: data_bar_ign,
             options: options_bar
@@ -419,7 +520,7 @@
       options: options
     };
     // Create the scatter plot
-    let scatter_chart = new Chart(ctx_scatter, config);
+    scatter_chart = new Chart(ctx_scatter, config);
 
     let dataset_heig_stdl = {
       label: 'HEIG-Vd',
@@ -447,10 +548,19 @@
     var heig_stdl_mean = 0.39; //388
     var ofs_stdl_mean = 0.39; //394
     var ign_stdl_mean = 0.34;
-
-
-  </script>
-
-
+      }
+    </script>
+    {% if reloader %}
+    <!-- Rechargement automatique : le serveur (revelation start) notifie par
+         WebSocket toute modification d'un .md ou .css du dossier. -->
+    <script>
+      (function () {
+        var proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
+        var reloader = new WebSocket(proto + location.host + '/reloader');
+        reloader.onmessage = function () { window.location.reload(); };
+        window.addEventListener('beforeunload', function () { reloader.close(); });
+      })();
+    </script>
+    {% endif %}
   </body>
 </html>
