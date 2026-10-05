@@ -15,6 +15,14 @@
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/toc-progress/toc-progress.css">
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/timetimer/timetimer.css">
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/chalkboard/style.css">
+    <style>
+      .slide-menu .heig-outils { list-style: none; margin: 0; padding: 0; }
+      .slide-menu .heig-outils a { display: block; padding: 12px 20px; color: inherit; text-decoration: none; }
+      .slide-menu .heig-outils a:hover { background: rgba(0, 0, 0, 0.08); }
+      .slide-menu .heig-outils i { width: 1.4em; }
+      .slide-menu .heig-outils kbd { float: right; font-size: 0.8em; opacity: 0.7; }
+      .slide-menu .heig-outils-aide { padding: 4px 20px; font-size: 0.85em; opacity: 0.7; }
+    </style>
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/highlight/zenburn.css">
 
     {% if theme %}
@@ -82,12 +90,11 @@
           mathjax: '{{ static_revealjs }}/plugin/mathjax/MathJax.js',
           config: 'TeX-AMS_HTML-full',
         },
-        // Tableau / annotations (touches : C annoter la slide, B tableau,
-        // Suppr effacer). Thème blanc, assorti aux slides HEIG.
+        // Tableau / annotations (chalkboard 2.3.3, sans boutons à l'écran) :
+        // C annoter la slide, B tableau, Suppr effacer ; aussi dans le menu,
+        // onglet « Outils ». Clic gauche dessine, clic droit gomme.
         chalkboard: {
           theme: 'whiteboard',
-          toggleChalkboardButton: { left: '120px', bottom: '20px' },
-          toggleNotesButton: { left: '165px', bottom: '20px' },
         },
         // ⚙️ Configuration du menu (tout est optionnel)
         menu: {
@@ -103,7 +110,21 @@
           openSlideNumber: false,
           keyboard: true,
           sticky: false,
-          autoOpen: true
+          autoOpen: true,
+          custom: [
+            {
+              title: 'Outils',
+              icon: '<i class="fas fa-pen"></i>',
+              content:
+                '<ul class="heig-outils">' +
+                '<li><a href="#" onclick="return heigOutil(\'notes\')"><i class="fas fa-pen"></i> Annoter la slide <kbd>C</kbd></a></li>' +
+                '<li><a href="#" onclick="return heigOutil(\'tableau\')"><i class="fas fa-chalkboard"></i> Tableau blanc <kbd>B</kbd></a></li>' +
+                '<li><a href="#" onclick="return heigOutil(\'effacer\')"><i class="fas fa-eraser"></i> Effacer la slide <kbd>Suppr</kbd></a></li>' +
+                '<li><a href="#" onclick="return heigOutil(\'tout\')"><i class="fas fa-trash"></i> Tout effacer</a></li>' +
+                '</ul>' +
+                '<p class="heig-outils-aide">Clic gauche : dessiner. Clic droit : gommer.</p>'
+            }
+          ]
         },
         //
         dependencies: [
@@ -123,6 +144,19 @@
           RevealChalkboard,
         ],
       });
+
+      // Actions du menu « Outils » : fermer le menu, puis agir.
+      function heigOutil(action) {
+        var menu = Reveal.getPlugin('menu');
+        if (menu && menu.closeMenu) menu.closeMenu();
+        setTimeout(function () {
+          if (action === 'notes') RevealChalkboard.toggleNotesCanvas();
+          else if (action === 'tableau') RevealChalkboard.toggleChalkboard();
+          else if (action === 'effacer') RevealChalkboard.clear();
+          else if (action === 'tout') RevealChalkboard.resetAll();
+        }, 150);
+        return false;
+      }
 
       // Ta config additionnelle
       Reveal.configure({{ config|tojson }});
