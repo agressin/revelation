@@ -1,54 +1,19 @@
-# Makefile
+# Makefile : raccourcis. Tout passe par uv ; une seule source de dépendances
+# (pyproject.toml + uv.lock), requirements.txt est exporté depuis le lock.
 
-######################################
+.PHONY: bootstrap
+bootstrap: # reveal.js figé + menu + MathJax + fichiers HEIG (heig/bootstrap.sh)
+	heig/bootstrap.sh
 
-ROOTDIR    := $(PWD)
-PACKAGE    := "revelation"
-
-######################################
-
-.PHONY: install
-install: # system-wide standard python installation
-	pip install .
-
-.PHONY: install.hack
-install.hack: # install development requirements
-	pip install -r requirements.txt
-	pip install -e .[test]
-
-.PHONY: build
-build: # build package for distribuition
-	rm -rf dist
-	python setup.py sdist
-	python setup.py bdist_wheel --universal
-
-.PHONY: publish
-publish: # publish package to the pypi
-	twine upload dist/*
-
-.PHONY: lint
-lint: # lint code
-	flake8 .
+.PHONY: lock
+lock: # régénère uv.lock puis requirements.txt (utilisé par la commande de lancement)
+	uv lock
+	uv export --no-dev --no-hashes --no-emit-project --format requirements-txt -o requirements.txt
 
 .PHONY: test
-test: # run tests
-	nosetests tests
+test: # tests (le navigateur n'est pas ouvert)
+	BROWSER=true uv run --group dev pytest
 
-.PHONY: cover
-cover: # coverage tests
-	nosetests -w tests --with-coverage --cover-package=$(PACKAGE)
-
-.PHONY: format
-format:
-	isort $(ROOTDIR) --recursive --apply
-	black -l 79 .
-
-.PHONY: clean
-clean: # remove temporary files and artifacts
-	rm -rf site/
-	rm -rf *.egg-info dist build
-	find . -name '*.pyc' -exec rm -f {} +
-	find . -name '*.pyo' -exec rm -f {} +
-	find . -name '*~' -exec rm -f {} +
-	find . -name '.coverage' -exec rm -f {} +
-	find . -name '__pycache__' -exec rmdir {} +
+.PHONY: start
+start: # lance la présentation du dossier courant : make start DIR=chemin
+	uv run --no-project --with-requirements requirements.txt revelation.py start -h localhost $(DIR)
