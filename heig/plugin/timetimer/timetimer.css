@@ -1,0 +1,124 @@
+/* Time-timer pour Reveal.js (plugin HEIG-VD), voir timetimer.js */
+
+:root {
+  --tt-rouge: #e34948;
+  --tt-encre: #0b0b0b;
+  --tt-gris: #52514e;
+  --tt-fond: #ffffff;
+  --tt-bord: #d9d8d4;
+}
+
+/* ---- bouton dans la slide ---------------------------------------------- */
+.reveal .tt-lancer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.15em 0.6em 0.15em 0.35em;
+  font: inherit;
+  font-size: 0.75em;
+  color: var(--tt-encre);
+  background: var(--tt-fond);
+  border: 2px solid var(--tt-rouge);
+  border-radius: 999px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.reveal .tt-lancer:hover { background: #fdeeee; }
+.reveal .tt-lancer svg { width: 1.3em; height: 1.3em; }
+.reveal .tt-lancer svg circle { fill: none; stroke: var(--tt-gris); stroke-width: 8; }
+.reveal .tt-lancer svg path { fill: var(--tt-rouge); }
+
+/* ---- panneau flottant (hors des slides, pas mis à l'échelle) ----------- */
+.tt-panneau {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  width: 220px;
+  background: var(--tt-fond);
+  border: 1px solid var(--tt-bord);
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  font-family: "Source Sans Pro", Helvetica, Arial, sans-serif;
+  color: var(--tt-encre);
+  user-select: none;
+  overflow: hidden;
+}
+.tt-bandeau {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px 4px 12px;
+  background: #f4f3f0;
+  cursor: move;
+  touch-action: none;
+}
+.tt-titre {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tt-cadran { display: block; width: 170px; height: 170px; margin: 10px auto 0; }
+.tt-fond { fill: #ffffff; stroke: var(--tt-bord); stroke-width: 1.5; }
+.tt-grad { stroke: var(--tt-gris); stroke-width: 1.5; }
+.tt-secteur { fill: var(--tt-rouge); }
+.tt-axe { fill: var(--tt-gris); }
+.tt-temps {
+  text-align: center;
+  font-size: 34px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.tt-commandes {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 0 12px;
+}
+.tt-btn {
+  min-width: 40px;
+  height: 34px;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--tt-encre);
+  background: #ffffff;
+  border: 1px solid var(--tt-bord);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.tt-btn:hover { background: #f4f3f0; }
+.tt-fermer { min-width: 30px; height: 28px; border: none; background: transparent; font-size: 22px; }
+
+/* ---- fin du temps ------------------------------------------------------ */
+.tt-fini .tt-temps { color: var(--tt-rouge); }
+.tt-fini .tt-cadran { animation: tt-clignote 0.8s ease-in-out 4; }
+@keyframes tt-clignote { 50% { opacity: 0.25; } }
+
+/* ---- plein écran ------------------------------------------------------- */
+.tt-panneau:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+}
+.tt-panneau:fullscreen .tt-bandeau {
+  position: absolute; top: 0; left: 0; right: 0;
+  background: transparent; cursor: default;
+}
+.tt-panneau:fullscreen .tt-titre { font-size: 3vmin; }
+.tt-panneau:fullscreen .tt-cadran { width: 68vmin; height: 68vmin; margin: 0; }
+.tt-panneau:fullscreen .tt-temps { font-size: 12vmin; }
+.tt-panneau:fullscreen .tt-btn { min-width: 7vmin; height: 6vmin; font-size: 3.5vmin; }
+
+/* ---- impression : pas de panneau, le bouton reste comme simple repère --- */
+@media print {
+  .tt-panneau { display: none !important; }
+  .reveal .tt-lancer { border-color: var(--tt-gris); }
+}

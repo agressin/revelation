@@ -13,6 +13,7 @@
     <!-- Plugins tiers (css) -->
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/title-footer/title-footer.css">
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/toc-progress/toc-progress.css">
+    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/timetimer/timetimer.css">
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/highlight/zenburn.css">
 
     {% if theme %}
@@ -63,6 +64,7 @@
     <script src="https://unpkg.com/reveal.js@5.2.1/plugin/highlight/highlight.js"></script>
     <script src="https://unpkg.com/reveal.js@5.2.1/plugin/notes/notes.js"></script>
     <script src="https://unpkg.com/reveal.js-menu@2.1.0/menu.js"></script>
+    <script src="{{ static_revealjs }}/plugin/timetimer/timetimer.js"></script>
     <!--
     <script src="{{ static_revealjs }}/reveal.js"></script>
     <script src="{{ static_revealjs }}/plugin/math/math.js"></script>
@@ -109,6 +111,7 @@
           RevealNotes,
           RevealMath,
           RevealMenu,
+          RevealTimeTimer,
         ],
       });
 
