@@ -46,7 +46,7 @@
     {% if reloader %}
       <!-- browser auto reload script -->
       <script async>
-        var reloader = new WebSocket("ws://localhost:4000/reloader");
+        var reloader = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/reloader');
 
         reloader.onmessage = function (event) {
           window.location.reload();

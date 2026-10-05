@@ -117,6 +117,18 @@
       // Ta config additionnelle
       Reveal.configure({{ config|tojson }});
     </script>
+    {% if reloader %}
+    <!-- Rechargement automatique : le serveur (revelation start) notifie par
+         WebSocket toute modification d'un .md ou .css du dossier. -->
+    <script>
+      (function () {
+        var proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
+        var reloader = new WebSocket(proto + location.host + '/reloader');
+        reloader.onmessage = function () { window.location.reload(); };
+        window.addEventListener('beforeunload', function () { reloader.close(); });
+      })();
+    </script>
+    {% endif %}
   </body>
 </html>
 
