@@ -158,21 +158,30 @@ REVEAL_META = {
             self.assertIn('No markdown files', result.output)
 
     def test_installreveal_command(self):
-        """Test installreveal downloads and extracts"""
-        with patch('revelation.cli.download_reveal') as mock_download:
-            with patch('revelation.cli.extract_file') as mock_extract:
-                with patch('revelation.cli.move_and_replace') as mock_move:
-                    # Setup mocks
-                    mock_download.return_value = ('/tmp/reveal.tar.gz', {})
-                    mock_extract.return_value = '/tmp/reveal-extracted'
+        """installreveal installe la version figée via install_revealjs"""
+        with patch('revelation.cli.install_revealjs') as mock_install:
+            mock_install.return_value = '5.2.1'
+            result = self.runner.invoke(cli, ['installreveal'])
+            self.assertEqual(result.exit_code, 0)
+            self.assertIn('installed reveal.js', result.output.lower())
+            mock_install.assert_called_once()
+            self.assertEqual(mock_install.call_args.kwargs['version'], '5.2.1')
 
-                    result = self.runner.invoke(cli, ['installreveal'])
+    def test_installreveal_error_is_reported(self):
+        """une erreur de téléchargement donne un message, pas un traceback"""
+        with patch('revelation.cli.install_revealjs', side_effect=RuntimeError('boom')):
+            result = self.runner.invoke(cli, ['installreveal'])
+            self.assertEqual(result.exit_code, 1)
+            self.assertIn('boom', result.output)
 
-                    self.assertEqual(result.exit_code, 0)
-                    self.assertIn('completed', result.output.lower())
-                    mock_download.assert_called_once()
-                    mock_extract.assert_called_once()
-                    mock_move.assert_called_once()
+    def test_start_without_revealjs_does_not_download(self):
+        """start sans reveal.js : message clair, aucun téléchargement"""
+        with patch('revelation.cli.os.path.exists', return_value=False):
+            with patch('revelation.cli.install_revealjs') as mock_install:
+                result = self.runner.invoke(cli, ['start', '.'])
+                self.assertEqual(result.exit_code, 1)
+                self.assertIn('bootstrap', result.output)
+                mock_install.assert_not_called()
 
 
 class CliErrorMessagesTestCase(TestCase):

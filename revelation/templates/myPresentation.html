@@ -56,22 +56,17 @@
       </div>
     </div>
 
-    <a rel="license" href="http://creativecommons.org/licenses/{{ licence }}/4.0/"><img alt="Creative Commons License" style="border-width:0;position:absolute;bottom:5px;right:150px;position:fixed;" src="https://i.creativecommons.org/l/{{ licence }}/4.0/88x31.png" /></a>
+    <a rel="license" href="http://creativecommons.org/licenses/{{ licence }}/4.0/"><img alt="Creative Commons License" style="border-width:0;position:absolute;bottom:5px;right:150px;position:fixed;" src="{{ static_revealjs }}/images/cc/{{ licence }}.png" /></a>
 
-    <script src="https://unpkg.com/reveal.js@5.2.1/dist/reveal.js"></script>
-    <script src="https://unpkg.com/reveal.js@5.2.1/plugin/math/math.js"></script>
-    <script src="https://unpkg.com/reveal.js@5.2.1/plugin/markdown/markdown.js"></script>
-    <script src="https://unpkg.com/reveal.js@5.2.1/plugin/highlight/highlight.js"></script>
-    <script src="https://unpkg.com/reveal.js@5.2.1/plugin/notes/notes.js"></script>
-    <script src="https://unpkg.com/reveal.js-menu@2.1.0/menu.js"></script>
-    <script src="{{ static_revealjs }}/plugin/timetimer/timetimer.js"></script>
-    <!--
+    <!-- Tout est servi en local (heig/bootstrap.sh) : aucune dépendance au
+         réseau en salle ni pour l'impression PDF. -->
     <script src="{{ static_revealjs }}/reveal.js"></script>
     <script src="{{ static_revealjs }}/plugin/math/math.js"></script>
     <script src="{{ static_revealjs }}/plugin/markdown/markdown.js"></script>
     <script src="{{ static_revealjs }}/plugin/highlight/highlight.js"></script>
     <script src="{{ static_revealjs }}/plugin/notes/notes.js"></script>
-    -->
+    <script src="{{ static_revealjs }}/plugin/menu/menu.js"></script>
+    <script src="{{ static_revealjs }}/plugin/timetimer/timetimer.js"></script>
 
     <script>
       
@@ -80,6 +75,11 @@
         progress: true,
         history: true,
         center: true,
+        // MathJax 2 servi en local (plugin RevealMath = MathJax 2 par défaut)
+        mathjax2: {
+          mathjax: '{{ static_revealjs }}/plugin/mathjax/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+        },
         // ⚙️ Configuration du menu (tout est optionnel)
         menu: {
           side: 'left',
@@ -89,7 +89,6 @@
           hideMissingTitles: false,
           markers: true,
           themes: false,          // ou true / liste custom
-          themesPath: 'dist/theme/',
           transitions: false,     // ou ['None','Fade','Slide']
           openButton: true,
           openSlideNumber: false,

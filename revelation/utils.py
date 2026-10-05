@@ -1,12 +1,24 @@
 """Utility tools used by revelation"""
 
+import base64
+import hashlib
 import os
 import shutil
 import tarfile
+import tempfile
 import zipfile
 from urllib.request import urlretrieve
 
 from . import default_config
+
+# reveal.js figé : la version servie aux cours ne doit pas changer d'elle-même.
+# Le paquet npm contient dist/ et plugin/, contrairement à l'archive GitHub
+# du dépôt source (qui n'a pas de dist/ à jour).
+REVEAL_VERSION = "5.2.1"
+REVEAL_NPM_URL = "https://registry.npmjs.org/reveal.js/-/reveal.js-{version}.tgz"
+REVEAL_INTEGRITY = {   # « integrity » publié par npm (dist.integrity)
+    "5.2.1": "sha512-r7//6mIM5p34hFiDMvYfXgyjXqGRta+/psd9YtytsgRlrpRzFv4RbH76TXd2qD+7ZPZEbpBDhdRhJaFgfQ7zNQ==",
+}
 
 REVEAL_URL = "https://github.com/hakimel/reveal.js/archive/{version}.tar.gz"
 PLUGINS_URL = {
@@ -148,3 +160,77 @@ def install_reveal_plugin(url, plugin, revealjs_folder):
     print("Installing reveal.js plugin to " + install_dir)
 
     move_and_replace(extracted_file, install_dir)
+
+
+def verify_integrity(path, integrity):
+    """Vérifie un fichier contre une chaîne « integrity » npm (sha512-<base64>)."""
+    algo, attendu = integrity.split("-", 1)
+    h = hashlib.new(algo)
+    with open(path, "rb") as f:
+        for bloc in iter(lambda: f.read(1 << 20), b""):
+            h.update(bloc)
+    obtenu = base64.b64encode(h.digest()).decode()
+    if obtenu != attendu:
+        raise RuntimeError(
+            f"Somme de contrôle incorrecte pour {path} : attendu {attendu}, obtenu {obtenu}"
+        )
+
+
+def safe_extract_tar(tgz, dest):
+    """Extrait une archive tar sans autoriser de chemin hors de dest."""
+    with tarfile.open(tgz, "r:*") as tfile:
+        if hasattr(tarfile, "data_filter"):
+            tfile.extractall(dest, filter="data")
+        else:  # Python < 3.12 sans le correctif : contrôle manuel
+            racine = os.path.realpath(dest)
+            for m in tfile.getmembers():
+                cible = os.path.realpath(os.path.join(dest, m.name))
+                if not cible.startswith(racine + os.sep) or m.issym() or m.islnk():
+                    raise RuntimeError(f"Entrée d'archive refusée : {m.name}")
+            tfile.extractall(dest)
+
+
+def install_revealjs(dest, version=REVEAL_VERSION, url=None):
+    """
+    Installe reveal.js (paquet npm) dans dest, à plat comme l'attendent les
+    templates : dest/reveal.js, dest/reveal.css, dest/theme/, dest/plugin/.
+
+    - version figée par défaut (REVEAL_VERSION), somme de contrôle vérifiée
+      quand elle est connue ;
+    - si dest est un lien symbolique, le lien est retiré (sa cible n'est pas
+      touchée) et remplacé par un vrai dossier : on n'écrit plus « à travers »
+      un lien vers un autre dépôt ;
+    - les fichiers qui ne viennent pas de reveal.js (thème HEIG, logos,
+      plugins locaux) sont conservés.
+
+    Returns:
+        str: la version installée
+    """
+    if url is None:
+        url = REVEAL_NPM_URL.format(version=version)
+    integrity = REVEAL_INTEGRITY.get(version) if url == REVEAL_NPM_URL.format(version=version) else None
+
+    with tempfile.TemporaryDirectory() as tmp:
+        archive = os.path.join(tmp, "reveal.tgz")
+        try:
+            urlretrieve(url, archive)
+        except Exception as e:
+            raise RuntimeError(f"Téléchargement impossible depuis {url} : {e}") from e
+        if integrity:
+            verify_integrity(archive, integrity)
+        safe_extract_tar(archive, tmp)
+        package = os.path.join(tmp, "package")
+        if not os.path.isdir(os.path.join(package, "dist")):
+            raise RuntimeError(f"Archive inattendue (pas de package/dist) : {url}")
+
+        if os.path.islink(dest):
+            os.unlink(dest)
+        os.makedirs(dest, exist_ok=True)
+        shutil.copytree(os.path.join(package, "dist"), dest, dirs_exist_ok=True)
+        if os.path.isdir(os.path.join(package, "plugin")):
+            shutil.copytree(os.path.join(package, "plugin"), os.path.join(dest, "plugin"),
+                            dirs_exist_ok=True)
+
+    with open(os.path.join(dest, "VERSION"), "w") as f:
+        f.write(f"reveal.js {version}\n")
+    return version

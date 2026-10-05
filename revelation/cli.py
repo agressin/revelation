@@ -13,11 +13,10 @@ from werkzeug.debug import DebuggedApplication
 import revelation
 from revelation import PresentationReloader, Revelation
 from revelation.utils import (
-    download_reveal,
-    extract_file,
-    make_presentation,
-    move_and_replace,
+    REVEAL_VERSION,
     install_reveal_plugin,
+    install_revealjs,
+    make_presentation,
     PLUGINS_URL
 )
 from revelation.convert_config import convert_config
@@ -47,24 +46,27 @@ def cli(ctx, version):
 @click.option(
     "--url",
     "-u",
-    help="Reveal.js download url (link to zip or tar.gz)"
+    help="Reveal.js download url (npm .tgz). Default: npm registry, pinned version"
 )
-@click.option("--version", "-v", help="Reveal.js version (default is master)")
+@click.option(
+    "--version", "-v", default=REVEAL_VERSION, show_default=True,
+    help="Reveal.js version"
+)
 def installreveal(url, version):
     """Reveal.js installation command
 
-    Receives the download url to install from a specific version or
-    downloads master version if noting is passed
+    Downloads the pinned reveal.js npm package (dist/ and plugin/), checks its
+    integrity, and installs it flat into revelation/static/revealjs.
+    Run heig/install.sh afterwards to add the HEIG theme, logos and plugins.
     """
-    click.echo("Downloading reveal.js...")
-
-    download = download_reveal(url, version)
-
-    click.echo("Installing reveal.js to "+REVEALJS_FOLDER)
-
-    move_and_replace(extract_file(download[0]), REVEALJS_FOLDER)
-
-    click.echo("Installation completed!")
+    click.echo(f"Downloading reveal.js {version}...")
+    try:
+        install_revealjs(REVEALJS_FOLDER, version=version, url=url)
+    except RuntimeError as e:
+        error_echo(str(e))
+        raise SystemExit(1)
+    click.echo("Installed reveal.js to " + REVEALJS_FOLDER)
+    click.echo("Next: heig/install.sh (HEIG theme, logos, plugins)")
 
 
 @cli.command("installrevealplugin", help="Install or upgrade reveal.js plugin")
@@ -154,10 +156,11 @@ def mkstatic(
 ):
     """Make static presentation"""
 
-    # Check if reveal.js is installed
-    if not os.path.exists(REVEALJS_FOLDER):
-        click.echo("Reveal.js not found, running installation...")
-        ctx.invoke(installreveal)
+    # Check if reveal.js is installed: no silent download at start
+    if not os.path.exists(os.path.join(REVEALJS_FOLDER, "reveal.js")):
+        error_echo(f"reveal.js not found in {REVEALJS_FOLDER}")
+        error_echo("Run heig/bootstrap.sh (or: revelation installreveal && heig/install.sh)")
+        ctx.exit(1)
 
     output_folder = os.path.realpath(output_folder)
 
@@ -325,10 +328,11 @@ def convertconfig(ctx, python_config, output, force):
 @click.pass_context
 def start(ctx, presentation, port, config, media, theme, style, debug, hostname):
     """Start revelation presentation command"""
-    # Check if reveal.js is installed
-    if not os.path.exists(REVEALJS_FOLDER):
-        click.echo("Reveal.js not found, running installation...")
-        ctx.invoke(installreveal)
+    # Check if reveal.js is installed: no silent download at start
+    if not os.path.exists(os.path.join(REVEALJS_FOLDER, "reveal.js")):
+        error_echo(f"reveal.js not found in {REVEALJS_FOLDER}")
+        error_echo("Run heig/bootstrap.sh (or: revelation installreveal && heig/install.sh)")
+        ctx.exit(1)
 
     # Check for presentation file
     if os.path.isfile(presentation):
