@@ -1,127 +1,96 @@
 /**
- * White theme for reveal.js. This is the opposite of the 'black' theme.
- * By Hakim El Hattab, http://hakim.se
+ * Thème HEIG-VD pour reveal.js (cours EC+G : GGT, GTE, MDT, CAS).
+ * Base : thème « white » de reveal.js (Hakim El Hattab), adapté.
+ * Source versionnée : revelation/heig/theme/ (installé par heig/install.sh).
+ *
+ * Résumé des conventions utilisables dans le markdown des cours :
+ *   <row> / <column2> / <column3>      colonnes (flex)
+ *   <left> / <right>                   blocs alignés
+ *   <small> / <medium>                 texte plus petit
+ *   <div id="text-align-left">         bloc aligné à gauche (historique)
+ *   <div class="text-left">            idem, à préférer pour les nouveaux cours
+ *   class="tab-zebre" / "tab-grille"   variantes de tableau (+ "compact")
+ *   class="corrige"                    slide masquée à l'impression
  */
 @import url(./fonts/source-sans-pro/source-sans-pro.css);
 
-/* =========================================
-   HEIG – EXTENSIONS & UTILITAIRES (NOUVEAU)
-   ========================================= */
+:root {
+  --heig-rouge: #da291c;
+  --heig-teal: #008080;
+  --heig-gris-clair: #f4f3f0;
+  --heig-gris-trait: #d9d8d4;
+}
 
-/* Balises custom : assure un rendu cohérent */
+/*********************************************
+ * MISE EN PAGE : balises et classes maison
+ *********************************************/
+
+/* Balises custom : rendu en bloc */
 row, right, left,
-column1, column2, column3, column4,
-column5, column6, column7, column8, column9, column10, column11, column12 {
+column1, column2, column3, column4 {
   display: block;
   box-sizing: border-box;
 }
 
-/* Alignements (tags et classes) */
-right, .right { text-align: right; margin: 0 10% 0 0;}
-left,  .left  { text-align: left; margin: 0 0 0 10%;}
+/* Alignements (balises et classes) */
+right, .right { text-align: right; margin: 0 10% 0 0; }
+left,  .left  { text-align: left;  margin: 0 0 0 10%; }
 .center, center { text-align: center; }
 
-/* Texte utilitaire */
+/* Bloc aligné à gauche. L'id est historique (2 300 occurrences dans les
+   cours, d'où id répété) ; la classe .text-left est son équivalent. */
+#text-align-left, .text-left { margin: 0 0 0 10%; text-align: left; }
+
+/* Texte réduit */
 .reveal small, small { display: inline-block; font-size: 0.6em; line-height: 1.2em; vertical-align: top; }
 .reveal medium, medium { font-size: 0.8em; line-height: 1.3em; vertical-align: top; }
 .small { font-size: smaller; line-height: 1.35; }
 .muted { opacity: 0.85; }
 
 /* Images fluides */
-img.fluid, .img-fluid img { max-width: 100%; height: auto; display: block; }
+img.fluid { max-width: 100%; height: auto; display: block; }
 
-/* Grille moderne (flex) – fonctionne pour .row et <row> */
-
+/* Grille (flex) : .row et <row>, colonnes en classe ou en balise.
+   Pas de règle « responsive » : reveal.js met la slide entière à l'échelle,
+   la disposition ne doit pas dépendre de la largeur de la fenêtre (sinon la
+   vue présentateur et une fenêtre réduite n'affichent pas la même slide). */
 .row, row {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
 }
-
-/* Variante pleine largeur */
 .row.full, row.full { margin: 0; }
 
-/* Colonnes – classes (.columnX) ET balises (<columnX>) */
 .column1, column1 { flex: 0 0 100%;    }
 .column2, column2 { flex: 0 0 50%;     }
 .column3, column3 { flex: 0 0 33.333%; }
-.column4, column4  { flex: 0 0 25%;     }
+.column4, column4 { flex: 0 0 25%;     }
 
-
-/* Padding léger dans les colonnes */
 [class^="column"], [class*=" column"],
 column1, column2, column3, column4 {
   padding: 0.25rem;
   box-sizing: border-box;
 }
 
-/* Utilitaire pour pousser une colonne à droite dans une .row */
-.push-right { margin-left: auto; }
+/* Ancienne mise en page à deux colonnes flottantes, encore utilisée par
+   quelques cours (LiDAR, classification en télédétection) : rétablie à
+   l'identique de l'ancien thème. */
+#left-col  { margin: 0 0 0 10%; float: left;  width: 40%; font-size: 0.85em; line-height: 1.5; }
+#right-col { margin: 0 10% 0 0; float: right; width: 40%; font-size: 0.85em; line-height: 1.5; }
 
-/* Anciennes règles conservées pour compat bilité (déconseillé) */
-#text-align-left { margin: 0 0 0 10%; text-align: left; } /* préfère .left + .row margin */
-#left-col, #right-col,
-.column2.legacy, .column3.legacy, .column4.legacy {
-  float: none; /* neutralise float si présent par le passé */
-}
-
-/* Logos & bandeau conférence (inchangés, légèrement consolidés) */
-.conference{
-  position: fixed;
-  bottom: -20px;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  margin: 0 auto;
-  font-size: 15px !important;
-  z-index: 12;
-}
-.logo, .logo-right{
+/* Logos du template */
+.logo, .logo-right {
   position: fixed;
   top: 32px;
   width: auto;
   max-height: 72px !important;
   z-index: 11;
 }
-.logo { left: 15px;  }
+.logo { left: 15px; }
 .logo-right { right: 15px; }
 
-@media screen and (max-height: 400px),
-       screen and (max-width: 350px){
-  .logo-ggt, .logo-master { display: none; }
-}
-
-/* Responsive : sous 900px, colonnes empilées */
-@media (max-width: 900px) {
-  .row, row { margin: 0 5%; }
-  .column1, .column2, .column3, .column4, .column5, .column6,
-  .column7, .column8, .column9, .column10, .column11, .column12,
-  column1, column2, column3, column4, column5, column6,
-  column7, column8, column9, column10, column11, column12 {
-    flex: 0 0 100%;
-  }
-}
-
 /*********************************************
-* HEIG - héritage (conserve tes sélecteurs)
-*********************************************/
-
-/* Balises custom alignement */
-right { margin: 0 0 0 10%; } /* tu peux retirer ce margin si tu veux un rendu plus neutre */
-
-/* Ancienne grille à floats – DÉSACTIVÉE (remplacée par flex)
-   Si tu veux forcer l'ancien comportement sur quelques slides,
-   ajoute la classe .legacy à .row et réactive les floats ci-dessous. */
-/*
-.column2 { float: left; width: 50%; }
-.column3 { float: left; width: 33.33%; }
-.column4 { float: left; width: 25%; }
-.row:after { content: ""; display: table; clear: both; }
-#left-col { margin: 0 0 0 10%; float: left; width:40%; font-size: 0.85em; line-height: 1.5; }
-#right-col { margin: 0 10% 0 0; float: right; width:40%; font-size: 0.85em; line-height: 1.5; }
-*/
-
-/*********************************************
- * RÉVÉAL – COULEURS & BASE
+ * COULEURS & BASE
  *********************************************/
 section.has-dark-background,
 section.has-dark-background h1,
@@ -141,22 +110,22 @@ section.has-dark-background h6 {
   --r-block-margin: 20px;
   --r-heading-margin: 0 0 20px 0;
   --r-heading-font: Source Sans Pro, Helvetica, sans-serif;
-  --r-heading-color: #008080;
+  --r-heading-color: var(--heig-teal);
   --r-heading-line-height: 1.2;
   --r-heading-letter-spacing: normal;
   --r-heading-text-transform: uppercase;
   --r-heading-text-shadow: none;
   --r-heading-font-weight: 600;
-  --r-heading1-color: #da291c;
+  --r-heading1-color: var(--heig-rouge);
   --r-heading1-text-shadow: none;
   --r-heading1-size: 2.5em;
   --r-heading2-size: 1.6em;
   --r-heading3-size: 1.3em;
   --r-heading4-size: 1em;
   --r-code-font: monospace;
-  --r-link-color: #da291C;
+  --r-link-color: var(--heig-rouge);
   --r-link-color-dark: #1a53a1;
-  --r-link-color-hover: #6ca0e8;
+  --r-link-color-hover: #a51f15;
   --r-selection-background-color: #98bdef;
   --r-selection-color: #fff;
   --r-overlay-element-bg-color: 0, 0, 0;
@@ -193,7 +162,7 @@ section.has-dark-background h6 {
 }
 
 /*********************************************
- * HEADERS
+ * TITRES
  *********************************************/
 .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5, .reveal h6 {
   margin: var(--r-heading-margin);
@@ -234,18 +203,33 @@ section.has-dark-background h6 {
 .reveal dt { font-weight: bold; }
 .reveal dd { margin-left: 40px; }
 
+/* Citation : barre teal à gauche, fond très clair, texte droit */
 .reveal blockquote {
   display: block;
   position: relative;
-  width: 70%;
+  width: 80%;
   margin: var(--r-block-margin) auto;
-  padding: 5px;
-  font-style: italic;
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+  padding: 0.4em 0.8em;
+  text-align: left;
+  font-style: normal;
+  background: #f3f8f8;
+  border-left: 6px solid var(--heig-teal);
+  box-shadow: none;
 }
-.reveal blockquote p:first-child,
-.reveal blockquote p:last-child { display: inline-block; }
+.reveal blockquote p { margin: 0.3em 0; }
+
+/* Touches clavier */
+.reveal kbd, .slide-menu kbd {
+  display: inline-block;
+  padding: 0.05em 0.35em;
+  font-family: var(--r-code-font);
+  font-size: 0.8em;
+  line-height: 1.2;
+  border: 1px solid var(--heig-gris-trait);
+  border-bottom-width: 3px;
+  border-radius: 5px;
+  background: #fff;
+}
 
 /*********************************************
  * CODE
@@ -263,27 +247,71 @@ section.has-dark-background h6 {
   box-shadow: 0 5px 15px rgba(0,0,0,0.15);
 }
 .reveal code { font-family: var(--r-code-font); text-transform: none; tab-size: 2; }
+/* Pas de hauteur maximale : l'ancienne limite de 400 px coupait le bas des
+   blocs de code (barre de défilement invisible en projection). */
 .reveal pre code {
   display: block;
   padding: 5px;
   overflow: auto;
-  max-height: 400px;
+  max-height: none;
   word-wrap: normal;
 }
 .reveal .code-wrapper { white-space: normal; }
 .reveal .code-wrapper code { white-space: pre; }
 
+/* Code en ligne : fond gris clair pour le distinguer du texte */
+.reveal :not(pre) > code {
+  padding: 0.05em 0.3em;
+  font-size: 0.9em;
+  background: var(--heig-gris-clair);
+  border-radius: 5px;
+}
+
 /*********************************************
- * TABLES
+ * TABLEAUX
+ * Style par défaut : « sobre ». Deux variantes, à poser sur la slide
+ * (<!-- .slide: class="tab-zebre" -->) ou autour d'un tableau
+ * (<div class="tab-zebre"> … </div>, lignes vides autour du tableau) :
+ *   tab-zebre   en-tête teal plein, lignes alternées
+ *   tab-grille  quadrillage léger, pour les tableaux de valeurs
+ * Modificateur combinable : compact (texte plus petit, cellules serrées).
  *********************************************/
-.reveal table { margin: auto; border-collapse: collapse; border-spacing: 0; }
-.reveal table th { font-weight: bold; }
+.reveal table { margin: var(--r-block-margin) auto; border-collapse: collapse; border-spacing: 0; }
 .reveal table th, .reveal table td {
-  text-align: left; padding: 0.2em 0.5em; border-bottom: 1px solid;
+  text-align: left;
+  padding: 0.25em 0.6em;
+  border-bottom: 1px solid var(--heig-gris-trait);
+}
+.reveal table th {
+  font-weight: 600;
+  border-bottom: 2px solid var(--heig-teal);
 }
 .reveal table th[align=center], .reveal table td[align=center] { text-align: center; }
 .reveal table th[align=right],  .reveal table td[align=right]  { text-align: right; }
 .reveal table tbody tr:last-child th, .reveal table tbody tr:last-child td { border-bottom: none; }
+
+/* Variante zébrée */
+.reveal .tab-zebre table th, .reveal table.tab-zebre th {
+  color: #fff;
+  background: var(--heig-teal);
+  border-bottom: none;
+}
+.reveal .tab-zebre table td, .reveal table.tab-zebre td { border-bottom: none; }
+.reveal .tab-zebre table tbody tr:nth-child(even), .reveal table.tab-zebre tbody tr:nth-child(even) {
+  background: var(--heig-gris-clair);
+}
+
+/* Variante grille */
+.reveal .tab-grille table th, .reveal .tab-grille table td,
+.reveal table.tab-grille th, .reveal table.tab-grille td {
+  border: 1px solid #c9c8c4;
+}
+.reveal .tab-grille table th, .reveal table.tab-grille th { background: var(--heig-gris-clair); }
+
+/* Modificateur compact */
+.reveal .compact table, .reveal table.compact { font-size: 0.75em; }
+.reveal .compact table th, .reveal .compact table td,
+.reveal table.compact th, .reveal table.compact td { padding: 0.12em 0.4em; }
 
 /*********************************************
  * SUP/SUB
@@ -312,7 +340,7 @@ section.has-dark-background h6 {
 .reveal .progress { background: rgba(0,0,0,0.2); color: var(--r-link-color); }
 
 /*********************************************
- * PRINT BACKGROUND
+ * IMPRESSION
  *********************************************/
 @media print {
   .backgrounds { background-color: var(--r-background-color); }
@@ -326,4 +354,3 @@ section.has-dark-background h6 {
   html body .reveal .slides .pdf-page:has(> section.corrige),
   html body .reveal .slides section.corrige { display: none !important; }
 }
-

@@ -6,7 +6,7 @@ qui reconstruit l'environnement complet, **hors ligne** ensuite.
 
 | Dossier | Contenu |
 |---|---|
-| `theme/` | `heig_ec+g.css` (thème des cours, `REVEAL_THEME = "heig_ec+g"`), `heig_ec+g-print.css`, `heig_ec+g_old.css` |
+| `theme/` | `heig_ec+g.css` (thème des cours, `REVEAL_THEME = "heig_ec+g"`) |
 | `images/` | logos utilisés par les templates (`logo-heig-vd.svg`, `logo-{gte,ggt,master,igso,sgpf,…}`, `coin_BG.png`), badges `cc/<licence>.png` |
 | `plugin/` | plugins absents de reveal.js : `timetimer` (minuteur, voir plus bas), `title-footer`, `toc-progress` (chargés par `myPresentation.html`), `chalkboard` (2.3.3, reveal.js-plugins 4.6.0, Asvin Goel, MIT : tableau blanc et annotations, chargé par `myPresentation.html`, sans bouton à l'écran ; menu onglet « Outils », touches C annoter, B tableau, Suppr effacer) |
 
@@ -37,6 +37,13 @@ un fichier différent est d'abord sauvegardé en `*.avant-heig`. On modifie
 donc le thème **ici**, et le changement est versionné.
 
 ## Conventions du thème `heig_ec+g`
+
+- Tableaux : style « sobre » par défaut (en-tête souligné teal, lignes grises
+  fines). Variantes sur la slide (`<!-- .slide: class="tab-zebre" -->`) ou
+  autour d'un tableau (`<div class="tab-zebre">`, lignes vides autour) :
+  `tab-zebre` (en-tête teal plein, lignes alternées), `tab-grille`
+  (quadrillage léger), et le modificateur `compact` (combinable).
+- `<div class="text-left">` : équivalent de l'historique `id="text-align-left"`.
 
 - `<!-- .slide: class="corrige" -->` : la slide reste visible en projection
   mais est masquée à l'impression (`?print-pdf`), pour distribuer un PDF des
