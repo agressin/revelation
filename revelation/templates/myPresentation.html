@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/sections/sections.css">
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/timetimer/timetimer.css">
     <link rel="stylesheet" href="{{ static_revealjs }}/plugin/chalkboard/style.css">
+    <link rel="stylesheet" href="{{ static_revealjs }}/plugin/photogra-widget/photogra-widget.css">
     <style>
       .slide-menu .heig-outils { list-style: none; margin: 0; padding: 0; }
       .slide-menu .heig-outils a { display: block; padding: 12px 20px; color: inherit; text-decoration: none; }
@@ -81,6 +82,7 @@
     <script src="{{ static_revealjs }}/plugin/chalkboard/plugin.js"></script>
     <script src="{{ static_revealjs }}/plugin/title-footer/title-footer.js"></script>
     <script src="{{ static_revealjs }}/plugin/sections/sections.js"></script>
+    <script src="{{ static_revealjs }}/plugin/photogra-widget/photogra-widget.js"></script>
 
     <script>
       // Options de ce template. La config du cours (REVEAL_CONFIG) est
@@ -136,6 +138,7 @@
         //
         plugins: [
           RevealMarkdown,
+          RevealPhotogra,      // après RevealMarkdown : agit sur le HTML produit
           RevealHighlight,
           RevealNotes,
           RevealMath,
